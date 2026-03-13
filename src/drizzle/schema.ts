@@ -1,16 +1,15 @@
 import {
-  pgTable,
-  uuid,
-  text,
-  numeric,
-  varchar,
-  smallint,
-  doublePrecision,
   boolean,
-  jsonb,
-  timestamp,
   date,
-  primaryKey,
+  doublePrecision,
+  jsonb,
+  numeric,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export interface ProjectDetail {
@@ -18,7 +17,7 @@ export interface ProjectDetail {
   value: string;
 }
 
-export const properties = pgTable("properties", {
+export const propertiesTable = pgTable("properties", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   slug: text("slug").unique().notNull(),
@@ -41,6 +40,7 @@ export const properties = pgTable("properties", {
     .$type<ProjectDetail[]>()
     .notNull()
     .default([]),
+  brochureKey: text("brochure_key"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -49,7 +49,7 @@ export const properties = pgTable("properties", {
     .defaultNow(),
 });
 
-export const teamMembers = pgTable("team_members", {
+export const teamMembersTable = pgTable("team_members", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   role: text("role").notNull(),
@@ -64,7 +64,7 @@ export const teamMembers = pgTable("team_members", {
     .defaultNow(),
 });
 
-export const blogPosts = pgTable("blog_posts", {
+export const blogPostsTable = pgTable("blog_posts", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   slug: text("slug").unique().notNull(),
@@ -83,13 +83,13 @@ export const blogPosts = pgTable("blog_posts", {
     .defaultNow(),
 });
 
-export const contactInquiries = pgTable("contact_inquiries", {
+export const contactInquiriesTable = pgTable("contact_inquiries", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
   message: text("message").notNull(),
-  propertyId: uuid("property_id").references(() => properties.id, {
+  propertyId: uuid("property_id").references(() => propertiesTable.id, {
     onDelete: "set null",
   }),
   status: varchar("status", { length: 50 }).notNull().default("new"),
@@ -98,7 +98,7 @@ export const contactInquiries = pgTable("contact_inquiries", {
     .defaultNow(),
 });
 
-export const galleryImages = pgTable("gallery_images", {
+export const galleryImagesTable = pgTable("gallery_images", {
   id: uuid("id").primaryKey().defaultRandom(),
   imageKey: text("image_key").notNull(),
   altText: text("alt_text"),
@@ -108,7 +108,7 @@ export const galleryImages = pgTable("gallery_images", {
     .defaultNow(),
 });
 
-export const siteSettings = pgTable("site_settings", {
+export const siteSettingsTable = pgTable("site_settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -116,19 +116,19 @@ export const siteSettings = pgTable("site_settings", {
     .defaultNow(),
 });
 
-export type Property = typeof properties.$inferSelect;
-export type NewProperty = typeof properties.$inferInsert;
+export type Property = typeof propertiesTable.$inferSelect;
+export type NewProperty = typeof propertiesTable.$inferInsert;
 
-export type TeamMember = typeof teamMembers.$inferSelect;
-export type NewTeamMember = typeof teamMembers.$inferInsert;
+export type TeamMember = typeof teamMembersTable.$inferSelect;
+export type NewTeamMember = typeof teamMembersTable.$inferInsert;
 
-export type BlogPost = typeof blogPosts.$inferSelect;
-export type NewBlogPost = typeof blogPosts.$inferInsert;
+export type BlogPost = typeof blogPostsTable.$inferSelect;
+export type NewBlogPost = typeof blogPostsTable.$inferInsert;
 
-export type ContactInquiry = typeof contactInquiries.$inferSelect;
-export type NewContactInquiry = typeof contactInquiries.$inferInsert;
+export type ContactInquiry = typeof contactInquiriesTable.$inferSelect;
+export type NewContactInquiry = typeof contactInquiriesTable.$inferInsert;
 
-export type GalleryImage = typeof galleryImages.$inferSelect;
-export type NewGalleryImage = typeof galleryImages.$inferInsert;
+export type GalleryImage = typeof galleryImagesTable.$inferSelect;
+export type NewGalleryImage = typeof galleryImagesTable.$inferInsert;
 
-export type SiteSetting = typeof siteSettings.$inferSelect;
+export type SiteSetting = typeof siteSettingsTable.$inferSelect;

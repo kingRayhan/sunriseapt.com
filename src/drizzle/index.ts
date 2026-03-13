@@ -1,12 +1,12 @@
 export { db } from "./db";
 
 export {
-  properties,
-  teamMembers,
-  blogPosts,
-  contactInquiries,
-  galleryImages,
-  siteSettings,
+  propertiesTable,
+  teamMembersTable,
+  blogPostsTable,
+  contactInquiriesTable,
+  galleryImagesTable,
+  siteSettingsTable,
 } from "./schema";
 
 export type {

@@ -1,0 +1,115 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import PropertyCard from "@/components/PropertyCard";
+import { type Property } from "@/drizzle";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+
+interface PropertyFiltersProps {
+  properties: Property[];
+}
+
+export default function PropertyFilters({ properties }: PropertyFiltersProps) {
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [bedroomFilter, setBedroomFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("price-asc");
+
+  const filtered = useMemo(() => {
+    let result = properties.filter((p) => {
+      if (typeFilter !== "all" && p.type !== typeFilter) return false;
+      if (bedroomFilter !== "all" && p.bedrooms !== parseInt(bedroomFilter)) return false;
+      if (locationFilter && !p.location?.toLowerCase().includes(locationFilter.toLowerCase())) return false;
+      return true;
+    });
+
+    result.sort((a, b) => {
+      const priceA = typeof a.price === "string" ? parseFloat(a.price) : a.price;
+      const priceB = typeof b.price === "string" ? parseFloat(b.price) : b.price;
+      const areaA = typeof a.area === "string" ? parseFloat(a.area) : a.area;
+      const areaB = typeof b.area === "string" ? parseFloat(b.area) : b.area;
+      if (sortBy === "price-asc") return priceA - priceB;
+      if (sortBy === "price-desc") return priceB - priceA;
+      if (sortBy === "area") return areaB - areaA;
+      return 0;
+    });
+
+    return result;
+  }, [properties, typeFilter, bedroomFilter, locationFilter, sortBy]);
+
+  return (
+    <>
+      <div className="border-b border-border bg-background sticky top-16 lg:top-20 z-40">
+        <div className="container mx-auto px-4 lg:px-8 py-4">
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by location..."
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="apartment">Apartment</SelectItem>
+                <SelectItem value="villa">Villa</SelectItem>
+                <SelectItem value="house">House</SelectItem>
+                <SelectItem value="penthouse">Penthouse</SelectItem>
+                <SelectItem value="townhouse">Townhouse</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={bedroomFilter} onValueChange={setBedroomFilter}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Bedrooms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any Beds</SelectItem>
+                <SelectItem value="1">1 Bedroom</SelectItem>
+                <SelectItem value="2">2 Bedrooms</SelectItem>
+                <SelectItem value="3">3 Bedrooms</SelectItem>
+                <SelectItem value="4">4 Bedrooms</SelectItem>
+                <SelectItem value="5">5+ Bedrooms</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="area">Largest First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
+        {filtered.length > 0 ? (
+          <>
+            <p className="text-sm text-muted-foreground mb-6">{filtered.length} properties found</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-lg text-muted-foreground">No properties match your filters.</p>
+            <p className="text-sm text-muted-foreground mt-2">Try adjusting your search criteria.</p>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

@@ -1,8 +1,10 @@
 import { Target, Eye, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { teamMembers } from "@/data/team";
+import { getTeamMembers } from "@/drizzle/queries/team";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const teamMembers = await getTeamMembers();
+
   return (
     <div className="pt-20 lg:pt-24">
       <div className="bg-primary text-primary-foreground py-12 lg:py-16">
@@ -71,7 +73,7 @@ export default function AboutPage() {
               <Card key={member.id} className="overflow-hidden border-border">
                 <div className="aspect-[3/4] overflow-hidden">
                   <img
-                    src={member.image}
+                    src={member.imageKey ?? ""}
                     alt={member.name}
                     className="w-full h-full object-cover"
                     loading="lazy"

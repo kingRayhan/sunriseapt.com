@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Calendar, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { blogPosts } from "@/data/blogPosts";
+import { getPublishedPosts } from "@/drizzle/queries/blog";
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const blogPosts = await getPublishedPosts();
   return (
     <div className="pt-20 lg:pt-24">
       <div className="bg-primary text-primary-foreground py-12 lg:py-16">
@@ -17,15 +18,17 @@ export default function BlogPage() {
       <div className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
         <div className="grid md:grid-cols-2 gap-8">
           {blogPosts.map((post) => (
-            <Link key={post.id} href={`/blog/${post.id}`}>
+            <Link key={post.id} href={`/blog/${post.slug}`}>
               <Card className="group overflow-hidden border-border hover:shadow-lg transition-all duration-300 h-full">
                 <div className="aspect-[16/9] overflow-hidden">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
+                  {post.imageKey && (
+                    <img
+                      src={post.imageKey}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  )}
                 </div>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-3">

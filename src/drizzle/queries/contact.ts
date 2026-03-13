@@ -1,11 +1,13 @@
+"use server";
+
 import { db } from "../db";
-import { contactInquiries, type NewContactInquiry } from "../schema";
+import { contactInquiriesTable, type NewContactInquiry } from "../schema";
 
 export async function submitContactInquiry(
   inquiry: Omit<NewContactInquiry, "id" | "status" | "createdAt">,
 ) {
   const rows = await db
-    .insert(contactInquiries)
+    .insert(contactInquiriesTable)
     .values(inquiry)
     .returning();
 

@@ -1,10 +1,10 @@
 import { asc } from "drizzle-orm";
 import { db } from "../db";
-import { galleryImages } from "../schema";
+import { galleryImagesTable } from "../schema";
 
 export async function getGalleryImages() {
   return db
     .select()
-    .from(galleryImages)
-    .orderBy(asc(galleryImages.sortOrder));
+    .from(galleryImagesTable)
+    .orderBy(asc(galleryImagesTable.sortOrder));
 }

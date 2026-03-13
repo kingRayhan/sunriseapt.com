@@ -1,15 +1,17 @@
-"use client";
+"use server";
 
-import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Calendar, ArrowLeft, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { blogPosts } from "@/data/blogPosts";
+import { getPostBySlug } from "@/drizzle/queries/blog";
 
-export default function BlogPostPage() {
-  const { id } = useParams<{ id: string }>();
-  const post = blogPosts.find((p) => p.id === id);
+interface Props {
+  params: { id: string };
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  const post = await getPostBySlug(params.id);
 
   if (!post) {
     return (
@@ -34,7 +36,13 @@ export default function BlogPostPage() {
 
       <article className="container mx-auto px-4 lg:px-8 pb-16 max-w-3xl">
         <div className="aspect-[16/9] rounded-lg overflow-hidden mb-8">
-          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+          {post.imageKey && (
+            <img
+              src={post.imageKey}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
 
         <div className="flex items-center gap-3 mb-4">
