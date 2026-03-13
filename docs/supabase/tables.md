@@ -7,93 +7,79 @@ Database schema for **Sunrise Property Hub**. The full SQL migration is in [`sch
 ## Entity Relationship Diagram
 
 ```
-properties
-├── property_images    (1:N)
-├── property_features  (1:N)
-├── project_details    (1:N)
-└── contact_inquiries  (0:N, optional FK)
+properties               (images, features, project_details as JSONB columns)
+└── contact_inquiries    (0:N, optional FK)
 
-team_members           (standalone)
-blog_posts             (standalone)
-gallery_images         (standalone)
-site_settings          (key-value store)
+team_members             (standalone)
+blog_posts               (standalone)
+gallery_images           (standalone)
+site_settings            (key-value store)
 ```
 
 ---
 
-## Tables Overview
+## Tables Overview (6 tables)
 
 ### 1. `properties`
 
-The core table. Each row is a property listing.
+The core table. Each row is a property listing. Images, features, and project details are stored as nested JSONB to avoid unnecessary joins -- they are always read/written together with the property.
 
-| Column       | Type               | Notes                                      |
-|--------------|--------------------|--------------------------------------------|
-| `id`         | `UUID` PK          | Auto-generated                             |
-| `title`      | `TEXT`             | e.g. "Luxury Waterfront Villa"             |
-| `slug`       | `TEXT` UNIQUE      | URL-friendly identifier                    |
-| `description`| `TEXT`             | Full description                           |
-| `price`      | `NUMERIC(14,2)`   | Price in local currency                    |
-| `type`       | `property_type`    | ENUM: apartment, villa, house, penthouse, townhouse |
-| `status`     | `property_status`  | ENUM: available, sold, reserved, upcoming  |
-| `bedrooms`   | `SMALLINT`         |                                            |
-| `bathrooms`  | `SMALLINT`         |                                            |
-| `area`       | `NUMERIC(10,2)`    | Square footage                             |
-| `year_built` | `SMALLINT`         |                                            |
-| `location`   | `TEXT`             | Neighborhood/area name                     |
-| `address`    | `TEXT`             | Full street address                        |
-| `lat`        | `DOUBLE PRECISION` | Latitude for map pin                       |
-| `lng`        | `DOUBLE PRECISION` | Longitude for map pin                      |
-| `featured`   | `BOOLEAN`          | Show on homepage                           |
-| `created_at` | `TIMESTAMPTZ`      | Auto-set                                   |
-| `updated_at` | `TIMESTAMPTZ`      | Auto-updated via trigger                   |
+| Column            | Type               | Notes                                      |
+|-------------------|--------------------|---------------------------------------------|
+| `id`              | `UUID` PK          | Auto-generated                              |
+| `title`           | `TEXT`             | e.g. "Luxury Waterfront Villa"              |
+| `slug`            | `TEXT` UNIQUE      | URL-friendly identifier                     |
+| `description`     | `TEXT`             | Full description                            |
+| `price`           | `NUMERIC(14,2)`   | Price in local currency                     |
+| `type`            | `VARCHAR(50)`      | e.g. apartment, villa, house, penthouse, townhouse |
+| `status`          | `VARCHAR(50)`      | e.g. available, sold, reserved, upcoming    |
+| `bedrooms`        | `SMALLINT`         |                                             |
+| `bathrooms`       | `SMALLINT`         |                                             |
+| `area`            | `NUMERIC(10,2)`    | Square footage                              |
+| `year_built`      | `SMALLINT`         |                                             |
+| `location`        | `TEXT`             | Neighborhood/area name                      |
+| `address`         | `TEXT`             | Full street address                         |
+| `lat`             | `DOUBLE PRECISION` | Latitude for map pin                        |
+| `lng`             | `DOUBLE PRECISION` | Longitude for map pin                       |
+| `featured`        | `BOOLEAN`          | Show on homepage                            |
+| `images`          | `JSONB`            | Array of image URLs (see below)             |
+| `features`        | `JSONB`            | Array of tag strings (see below)            |
+| `project_details` | `JSONB`            | Array of {label, value} objects (see below) |
+| `created_at`      | `TIMESTAMPTZ`      | Auto-set                                    |
+| `updated_at`      | `TIMESTAMPTZ`      | Auto-updated via trigger                    |
 
 **Indexes:** `type`, `status`, `featured` (partial), `slug`
 
----
+#### JSONB column formats
 
-### 2. `property_images`
+**`images`** -- ordered array of storage keys, first entry is the thumbnail (resolve to full URL via Supabase Storage):
+```json
+[
+  "property-images/abc/img1.jpg",
+  "property-images/abc/img2.jpg"
+]
+```
 
-Multiple images per property, ordered by `sort_order`.
+**`features`** -- array of tag strings:
+```json
+["Pool", "Smart Home", "Wine Cellar", "Garage"]
+```
 
-| Column        | Type      | Notes                          |
-|---------------|-----------|--------------------------------|
-| `id`          | `UUID` PK |                                |
-| `property_id` | `UUID` FK | → `properties.id` (CASCADE)   |
-| `url`         | `TEXT`    | Supabase Storage URL or external |
-| `alt_text`    | `TEXT`    | Accessibility text             |
-| `sort_order`  | `SMALLINT`| First image = thumbnail        |
-| `created_at`  | `TIMESTAMPTZ` |                            |
-
----
-
-### 3. `property_features`
-
-Tags/features for a property (e.g. "Pool", "Smart Home").
-
-| Column        | Type      | Notes                          |
-|---------------|-----------|--------------------------------|
-| `id`          | `UUID` PK |                                |
-| `property_id` | `UUID` FK | → `properties.id` (CASCADE)   |
-| `feature`     | `TEXT`    | Unique per property            |
-
----
-
-### 4. `project_details`
-
-Key-value project spec rows (the "Project At A Glance" section).
-
-| Column        | Type      | Notes                          |
-|---------------|-----------|--------------------------------|
-| `id`          | `UUID` PK |                                |
-| `property_id` | `UUID` FK | → `properties.id` (CASCADE)   |
-| `label`       | `TEXT`    | e.g. "Orientation"             |
-| `value`       | `TEXT`    | e.g. "East Facing"             |
-| `sort_order`  | `SMALLINT`| Display order                  |
+**`project_details`** -- ordered array of label/value pairs ("Project At A Glance"):
+```json
+[
+  { "label": "Front Road", "value": "60 Feet" },
+  { "label": "Land size", "value": "3 Katha" },
+  { "label": "Apartment Size", "value": "1682 SFT." },
+  { "label": "Number of Unit", "value": "6 Nos." },
+  { "label": "Number of Floor", "value": "G+7" },
+  { "label": "Developer", "value": "Sunrise Apartments Ltd." }
+]
+```
 
 ---
 
-### 5. `team_members`
+### 2. `team_members`
 
 Company team displayed on the About page.
 
@@ -103,14 +89,14 @@ Company team displayed on the About page.
 | `name`       | `TEXT`    |                                |
 | `role`       | `TEXT`    | e.g. "Founder & CEO"          |
 | `bio`        | `TEXT`    | Short biography                |
-| `image_url`  | `TEXT`    | Photo URL                      |
+| `image_key`  | `TEXT`    | Storage key for photo           |
 | `sort_order` | `SMALLINT`| Display order                  |
 | `created_at` | `TIMESTAMPTZ` |                            |
 | `updated_at` | `TIMESTAMPTZ` | Auto-updated via trigger   |
 
 ---
 
-### 6. `blog_posts`
+### 3. `blog_posts`
 
 Blog articles with publish control.
 
@@ -123,7 +109,7 @@ Blog articles with publish control.
 | `content`    | `TEXT`    | Full article body (Markdown)   |
 | `date`       | `DATE`    | Publish date                   |
 | `author`     | `TEXT`    | Author name                    |
-| `image_url`  | `TEXT`    | Cover image                    |
+| `image_key`  | `TEXT`    | Storage key for cover image     |
 | `category`   | `TEXT`    | e.g. "Market Insights"         |
 | `published`  | `BOOLEAN` | Only published posts are public|
 | `created_at` | `TIMESTAMPTZ` |                            |
@@ -133,7 +119,7 @@ Blog articles with publish control.
 
 ---
 
-### 7. `contact_inquiries`
+### 4. `contact_inquiries`
 
 Submissions from the Contact page and property detail "Ask a Question".
 
@@ -145,26 +131,26 @@ Submissions from the Contact page and property detail "Ask a Question".
 | `phone`       | `TEXT`           | Optional                       |
 | `message`     | `TEXT`           |                                |
 | `property_id` | `UUID` FK (nullable) | Links to a property if inquiry is property-specific |
-| `status`      | `inquiry_status` | ENUM: new, contacted, closed   |
+| `status`      | `VARCHAR(50)`    | e.g. new, contacted, closed    |
 | `created_at`  | `TIMESTAMPTZ`    |                                |
 
 ---
 
-### 8. `gallery_images`
+### 5. `gallery_images`
 
 Company gallery images shown on the homepage.
 
 | Column       | Type      | Notes                          |
 |--------------|-----------|--------------------------------|
 | `id`         | `UUID` PK |                                |
-| `url`        | `TEXT`    | Image URL                      |
+| `image_key`  | `TEXT`    | Storage key for image           |
 | `alt_text`   | `TEXT`    | Accessibility text             |
 | `sort_order` | `SMALLINT`| Display order                  |
 | `created_at` | `TIMESTAMPTZ` |                            |
 
 ---
 
-### 9. `site_settings`
+### 6. `site_settings`
 
 Key-value store for global company info (address, phones, emails, logo).
 
@@ -174,7 +160,7 @@ Key-value store for global company info (address, phones, emails, logo).
 | `value`      | `TEXT`    | The setting value              |
 | `updated_at` | `TIMESTAMPTZ` | Auto-updated via trigger   |
 
-**Seeded keys:** `company_name`, `address`, `phone_1`, `phone_2`, `email_sales`, `email_info`, `logo_url`
+**Seeded keys:** `company_name`, `address`, `phone_1`, `phone_2`, `email_sales`, `email_info`, `logo_key`
 
 ---
 
@@ -183,9 +169,6 @@ Key-value store for global company info (address, phones, emails, logo).
 | Table              | Public (anon)          | Authenticated (admin)  |
 |--------------------|------------------------|------------------------|
 | `properties`       | SELECT                 | ALL                    |
-| `property_images`  | SELECT                 | ALL                    |
-| `property_features`| SELECT                 | ALL                    |
-| `project_details`  | SELECT                 | ALL                    |
 | `team_members`     | SELECT                 | ALL                    |
 | `blog_posts`       | SELECT (published only)| ALL                    |
 | `contact_inquiries`| INSERT only            | ALL                    |
