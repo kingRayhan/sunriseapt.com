@@ -10,12 +10,9 @@ export const metadata: Metadata = {
     template: "%s | Sunriseapt",
   },
   description:
-    "Your trusted partner in finding the perfect property. Premium properties in South Florida's most desirable locations.",
+    "Sunrise Apartments ltd is a Real Estate company that creates living spaces that seamlessly blend luxury and nature. We believe that everyone deserves to live in a beautiful, sustainable environment, and we are committed to creating apartments that are both stylish and eco-friendly.",
   openGraph: {
-    title: "Sunriseapt - Premium Real Estate",
-    description:
-      "Your trusted partner in finding the perfect property. Premium properties in South Florida's most desirable locations.",
-    type: "website",
+    title: "Sunrise Apartments ltd - Premium Real Estate",
   },
   twitter: {
     card: "summary_large_image",
