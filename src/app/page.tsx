@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertyCard from "@/components/PropertyCard";
+import CompanyGallery from "@/components/CompanyGallery";
 import { properties } from "@/data/properties";
 
 const heroSlides = [
@@ -194,8 +195,11 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Company Gallery */}
+      <CompanyGallery />
+
       {/* Map Section */}
-      <section className="py-16 lg:py-24 bg-secondary">
+      <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-3">Our Locations</h2>
