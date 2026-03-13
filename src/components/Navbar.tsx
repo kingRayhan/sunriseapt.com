@@ -22,8 +22,12 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          <Link href="/" className="text-xl lg:text-2xl font-bold tracking-tight text-primary">
-            Sunriseapt
+          <Link href="/" className="shrink-0">
+            <img
+              src="/full-logo.png"
+              alt="Sunrise Apartments"
+              className="h-10 lg:h-12 w-auto"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
@@ -33,8 +37,8 @@ const Navbar = () => {
                 href={link.href}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                   pathname === link.href
-                    ? "text-primary bg-secondary"
-                    : "text-muted-foreground hover:text-primary hover:bg-secondary"
+                    ? "text-primary bg-sky-light"
+                    : "text-muted-foreground hover:text-primary hover:bg-sky-light"
                 }`}
               >
                 {link.label}
@@ -43,7 +47,7 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:block">
-            <Button asChild>
+            <Button asChild className="bg-gold hover:bg-gold-dark text-white">
               <Link href="/contact">Get in Touch</Link>
             </Button>
           </div>
@@ -67,15 +71,15 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                   className={`px-4 py-3 text-sm font-medium rounded-md transition-colors ${
                     pathname === link.href
-                      ? "text-primary bg-secondary"
-                      : "text-muted-foreground hover:text-primary hover:bg-secondary"
+                      ? "text-primary bg-sky-light"
+                      : "text-muted-foreground hover:text-primary hover:bg-sky-light"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
               <div className="mt-2 px-4">
-                <Button asChild className="w-full">
+                <Button asChild className="w-full bg-gold hover:bg-gold-dark text-white">
                   <Link href="/contact" onClick={() => setIsOpen(false)}>Get in Touch</Link>
                 </Button>
               </div>

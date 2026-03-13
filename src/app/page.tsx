@@ -67,7 +67,7 @@ export default function HomePage() {
                 {heroSlides[currentSlide].subtitle}
               </p>
               <div className="flex gap-4">
-                <Button size="lg" asChild>
+                <Button size="lg" asChild className="bg-gold hover:bg-gold-dark text-white">
                   <Link href="/properties">Browse Properties</Link>
                 </Button>
                 <Button size="lg" variant="outline" className="bg-white/10 border-white text-white hover:bg-white/20" asChild>
@@ -111,7 +111,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-x-8 gap-y-10">
             {/* Row 1 */}
             <div>
-              <h2 className="text-2xl font-bold text-foreground mb-4">About Us</h2>
+              <h2 className="text-2xl font-bold text-primary mb-4">About Us</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Sunrise Apartments ltd is a Real Estate company that creates living spaces that
                 seamlessly blend luxury and nature. We believe that everyone deserves to live in a
@@ -127,7 +127,7 @@ export default function HomePage() {
               />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-foreground mb-4">Mission</h2>
+              <h2 className="text-2xl font-bold text-primary mb-4">Mission</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Our team of architects and designers has meticulously designed these apartments to
                 maximize natural light, optimize space, and incorporate sustainability. The result is
@@ -144,7 +144,7 @@ export default function HomePage() {
               />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-foreground mb-4">Vision</h2>
+              <h2 className="text-2xl font-bold text-primary mb-4">Vision</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 &ldquo;Sunrise Apartments Ltd. our goal is simple yet powerful: turning dreams into
                 reality. We strive to create exceptional living spaces that embody innovation,
@@ -159,7 +159,7 @@ export default function HomePage() {
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-4 right-4">
-                <Button variant="outline" size="sm" className="bg-background/90" asChild>
+                <Button size="sm" className="bg-gold hover:bg-gold-dark text-white" asChild>
                   <Link href="/contact">Contact us</Link>
                 </Button>
               </div>
@@ -176,7 +176,7 @@ export default function HomePage() {
               <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-2">Featured Properties</h2>
               <p className="text-muted-foreground">Hand-picked properties for you</p>
             </div>
-            <Button variant="ghost" asChild className="hidden md:flex">
+            <Button variant="ghost" asChild className="hidden md:flex text-primary hover:text-gold-dark">
               <Link href="/properties">
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
