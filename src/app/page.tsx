@@ -1,10 +1,9 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Target, Eye, Building, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import { properties } from "@/data/properties";
 
@@ -26,7 +25,7 @@ const heroSlides = [
   },
 ];
 
-const Index = () => {
+export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const featuredProperties = properties.filter((p) => p.featured);
 
@@ -38,9 +37,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-
+    <>
       {/* Hero Carousel */}
       <section className="relative h-screen">
         {heroSlides.map((slide, index) => (
@@ -70,17 +67,16 @@ const Index = () => {
               </p>
               <div className="flex gap-4">
                 <Button size="lg" asChild>
-                  <Link to="/properties">Browse Properties</Link>
+                  <Link href="/properties">Browse Properties</Link>
                 </Button>
                 <Button size="lg" variant="outline" className="bg-white/10 border-white text-white hover:bg-white/20" asChild>
-                  <Link to="/contact">Contact Us</Link>
+                  <Link href="/contact">Contact Us</Link>
                 </Button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Carousel Controls */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4">
           <button
             onClick={() => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
@@ -108,43 +104,65 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Mission / Vision / About */}
-      <section className="py-16 lg:py-24 bg-secondary">
+      {/* About / Mission / Vision */}
+      <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-3">Who We Are</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Dedicated to connecting people with exceptional properties and unmatched service.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Target,
-                title: "Our Mission",
-                description: "To provide a seamless and transparent real estate experience, helping every client find a property that truly feels like home.",
-              },
-              {
-                icon: Eye,
-                title: "Our Vision",
-                description: "To be South Florida's most trusted real estate partner, known for integrity, innovation, and exceptional client outcomes.",
-              },
-              {
-                icon: Building,
-                title: "About Us",
-                description: "With over a decade of experience, we specialize in luxury and residential properties across South Florida's most sought-after communities.",
-              },
-            ].map((item) => (
-              <Card key={item.title} className="text-center border-none shadow-sm">
-                <CardContent className="p-8">
-                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                    <item.icon className="h-7 w-7 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid md:grid-cols-3 gap-x-8 gap-y-10">
+            {/* Row 1 */}
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-4">About Us</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Sunrise Apartments ltd is a Real Estate company that creates living spaces that
+                seamlessly blend luxury and nature. We believe that everyone deserves to live in a
+                beautiful, sustainable environment, and we are committed to creating apartments that
+                are both stylish and eco-friendly.
+              </p>
+            </div>
+            <div className="rounded-lg overflow-hidden aspect-[4/3]">
+              <img
+                src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800"
+                alt="Nature and sustainability"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Mission</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Our team of architects and designers has meticulously designed these apartments to
+                maximize natural light, optimize space, and incorporate sustainability. The result is
+                a space that offers comfort and luxury while harmonizing with nature.
+              </p>
+            </div>
+
+            {/* Row 2 */}
+            <div className="rounded-lg overflow-hidden aspect-[4/3]">
+              <img
+                src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800"
+                alt="Construction and development"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Vision</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                &ldquo;Sunrise Apartments Ltd. our goal is simple yet powerful: turning dreams into
+                reality. We strive to create exceptional living spaces that embody innovation,
+                quality, and dedication. Our vision is to set new standard in the real estate
+                industry, redefining urban living with excellence.
+              </p>
+            </div>
+            <div className="relative rounded-lg overflow-hidden aspect-[4/3]">
+              <img
+                src="https://images.unsplash.com/photo-1563811771046-ba984ff30900?w=800"
+                alt="Building with care"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-4 right-4">
+                <Button variant="outline" size="sm" className="bg-background/90" asChild>
+                  <Link href="/contact">Contact us</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -158,7 +176,7 @@ const Index = () => {
               <p className="text-muted-foreground">Hand-picked properties for you</p>
             </div>
             <Button variant="ghost" asChild className="hidden md:flex">
-              <Link to="/properties">
+              <Link href="/properties">
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -170,7 +188,7 @@ const Index = () => {
           </div>
           <div className="mt-8 text-center md:hidden">
             <Button asChild>
-              <Link to="/properties">View All Properties</Link>
+              <Link href="/properties">View All Properties</Link>
             </Button>
           </div>
         </div>
@@ -197,10 +215,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   );
-};
-
-export default Index;
+}

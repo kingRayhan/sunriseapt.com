@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
@@ -6,7 +6,6 @@ const Footer = () => {
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          {/* Brand */}
           <div>
             <h3 className="text-xl font-bold mb-4">Sunriseapt</h3>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
@@ -14,20 +13,19 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
               {[
-                { to: "/", label: "Home" },
-                { to: "/properties", label: "Properties" },
-                { to: "/about", label: "About Us" },
-                { to: "/blog", label: "Blog" },
-                { to: "/contact", label: "Contact" },
+                { href: "/", label: "Home" },
+                { href: "/properties", label: "Properties" },
+                { href: "/about", label: "About Us" },
+                { href: "/blog", label: "Blog" },
+                { href: "/contact", label: "Contact" },
               ].map((link) => (
-                <li key={link.to}>
+                <li key={link.href}>
                   <Link
-                    to={link.to}
+                    href={link.href}
                     className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                   >
                     {link.label}
@@ -37,7 +35,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Property Types */}
           <div>
             <h4 className="font-semibold mb-4">Property Types</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/70">
@@ -49,7 +46,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div>
             <h4 className="font-semibold mb-4">Contact Us</h4>
             <ul className="space-y-3 text-sm">

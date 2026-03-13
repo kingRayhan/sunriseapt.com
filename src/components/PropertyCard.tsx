@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Bed, Bath, Maximize } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ interface PropertyCardProps {
 
 const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
-    <Link to={`/properties/${property.id}`}>
+    <Link href={`/properties/${property.id}`}>
       <Card className="group overflow-hidden border-border hover:shadow-lg transition-all duration-300">
         <div className="relative overflow-hidden aspect-[4/3]">
           <img

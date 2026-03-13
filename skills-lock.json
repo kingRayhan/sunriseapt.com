@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "nextjs": {
+      "source": "timelessco/recollect",
+      "sourceType": "github",
+      "computedHash": "5371789cdb09acd4dc0c100834adf1df45d6a1e688ab5f8d29837ed978ad0186"
+    }
+  }
+}
