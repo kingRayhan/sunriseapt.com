@@ -1,3 +1,8 @@
+export interface ProjectDetail {
+  label: string;
+  value: string;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -15,6 +20,8 @@ export interface Property {
   images: string[];
   featured: boolean;
   features: string[];
+  updatedAt?: string;
+  projectDetails?: ProjectDetail[];
 }
 
 export const properties: Property[] = [
@@ -39,6 +46,19 @@ export const properties: Property[] = [
     ],
     featured: true,
     features: ["Pool", "Beach Access", "Smart Home", "Wine Cellar", "Home Theater"],
+    updatedAt: "May 15, 2024 at 7:40 am",
+    projectDetails: [
+      { label: "Project Name", value: "Plot # 9, Road-8 Sector-16/I, Uttara, 1230" },
+      { label: "Orientation", value: "East Facing" },
+      { label: "Front Road", value: "60 Feet" },
+      { label: "Land size", value: "3 Katha" },
+      { label: "Apartment Size", value: "1682 SFT." },
+      { label: "Duplex Villa", value: "3364 sft. 1 Nos." },
+      { label: "Number of Unit", value: "6 Nos." },
+      { label: "Number of Floor", value: "G+7" },
+      { label: "Apartment Contain", value: "04 Beds, 4 Baths (03 Attached) 02 Ver, Living & Dining, Kitchen" },
+      { label: "Developer", value: "Sunrise Apartments Ltd." },
+    ],
   },
   {
     id: "2",
@@ -61,6 +81,18 @@ export const properties: Property[] = [
     ],
     featured: true,
     features: ["Concierge", "Rooftop Pool", "Gym", "Parking", "City Views"],
+    updatedAt: "June 10, 2024 at 9:15 am",
+    projectDetails: [
+      { label: "Project Name", value: "Sky Tower, 456 Brickell Ave, Miami" },
+      { label: "Orientation", value: "South Facing" },
+      { label: "Front Road", value: "80 Feet" },
+      { label: "Land size", value: "5 Katha" },
+      { label: "Apartment Size", value: "3200 SFT." },
+      { label: "Number of Unit", value: "12 Nos." },
+      { label: "Number of Floor", value: "G+25" },
+      { label: "Apartment Contain", value: "03 Beds, 3 Baths (02 Attached) 01 Ver, Living & Dining, Kitchen" },
+      { label: "Developer", value: "Sunrise Apartments Ltd." },
+    ],
   },
   {
     id: "3",
@@ -83,6 +115,18 @@ export const properties: Property[] = [
     ],
     featured: true,
     features: ["Pool", "Garden", "Fireplace", "Garage", "Near Schools"],
+    updatedAt: "April 20, 2024 at 11:30 am",
+    projectDetails: [
+      { label: "Project Name", value: "Granada Residence, 789 Granada Blvd, Coral Gables" },
+      { label: "Orientation", value: "West Facing" },
+      { label: "Front Road", value: "50 Feet" },
+      { label: "Land size", value: "4 Katha" },
+      { label: "Apartment Size", value: "3000 SFT." },
+      { label: "Number of Unit", value: "1 Nos." },
+      { label: "Number of Floor", value: "G+2" },
+      { label: "Apartment Contain", value: "04 Beds, 3 Baths (02 Attached) 01 Ver, Living & Dining, Kitchen, Family Room" },
+      { label: "Developer", value: "Sunrise Apartments Ltd." },
+    ],
   },
   {
     id: "4",
@@ -105,6 +149,18 @@ export const properties: Property[] = [
     ],
     featured: false,
     features: ["Modern Design", "Walkable", "Laundry", "Pet Friendly"],
+    updatedAt: "March 5, 2024 at 3:00 pm",
+    projectDetails: [
+      { label: "Project Name", value: "Wynwood Lofts, 101 NW 25th St, Miami" },
+      { label: "Orientation", value: "North Facing" },
+      { label: "Front Road", value: "40 Feet" },
+      { label: "Land size", value: "2 Katha" },
+      { label: "Apartment Size", value: "650 SFT." },
+      { label: "Number of Unit", value: "24 Nos." },
+      { label: "Number of Floor", value: "G+10" },
+      { label: "Apartment Contain", value: "01 Bed, 1 Bath, Living & Kitchen" },
+      { label: "Developer", value: "Sunrise Apartments Ltd." },
+    ],
   },
   {
     id: "5",
@@ -127,6 +183,18 @@ export const properties: Property[] = [
     ],
     featured: false,
     features: ["Near Beach", "Rooftop Terrace", "Garage", "Community Pool"],
+    updatedAt: "February 12, 2024 at 10:00 am",
+    projectDetails: [
+      { label: "Project Name", value: "Seaside Townhomes, 555 A1A, Fort Lauderdale" },
+      { label: "Orientation", value: "East Facing" },
+      { label: "Front Road", value: "45 Feet" },
+      { label: "Land size", value: "2.5 Katha" },
+      { label: "Apartment Size", value: "2100 SFT." },
+      { label: "Number of Unit", value: "8 Nos." },
+      { label: "Number of Floor", value: "G+3" },
+      { label: "Apartment Contain", value: "03 Beds, 2 Baths (01 Attached) 01 Ver, Living & Dining, Kitchen" },
+      { label: "Developer", value: "Sunrise Apartments Ltd." },
+    ],
   },
   {
     id: "6",
@@ -149,6 +217,18 @@ export const properties: Property[] = [
     ],
     featured: true,
     features: ["Private Garden", "Spa", "Tennis", "Pool", "Security"],
+    updatedAt: "January 8, 2024 at 2:45 pm",
+    projectDetails: [
+      { label: "Project Name", value: "Garden Residences, 200 Crandon Blvd, Key Biscayne" },
+      { label: "Orientation", value: "South Facing" },
+      { label: "Front Road", value: "55 Feet" },
+      { label: "Land size", value: "3.5 Katha" },
+      { label: "Apartment Size", value: "1400 SFT." },
+      { label: "Number of Unit", value: "16 Nos." },
+      { label: "Number of Floor", value: "G+12" },
+      { label: "Apartment Contain", value: "02 Beds, 2 Baths (01 Attached) Living & Dining, Kitchen" },
+      { label: "Developer", value: "Sunrise Apartments Ltd." },
+    ],
   },
   {
     id: "7",
@@ -171,6 +251,18 @@ export const properties: Property[] = [
     ],
     featured: false,
     features: ["High Ceilings", "Natural Light", "Arts District", "Parking"],
+    updatedAt: "December 20, 2023 at 4:30 pm",
+    projectDetails: [
+      { label: "Project Name", value: "Design Lofts, 300 NE 40th St, Miami" },
+      { label: "Orientation", value: "West Facing" },
+      { label: "Front Road", value: "35 Feet" },
+      { label: "Land size", value: "1.5 Katha" },
+      { label: "Apartment Size", value: "1100 SFT." },
+      { label: "Number of Unit", value: "18 Nos." },
+      { label: "Number of Floor", value: "G+8" },
+      { label: "Apartment Contain", value: "01 Bed, 1 Bath, Living & Kitchen, Mezzanine" },
+      { label: "Developer", value: "Sunrise Apartments Ltd." },
+    ],
   },
 ];
 
