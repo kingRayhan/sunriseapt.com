@@ -69,8 +69,19 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/20 mt-10 pt-6 text-center text-sm text-primary-foreground/50">
+        <div className="border-t border-primary-foreground/20 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-primary-foreground/50">
           <p>&copy; {new Date().getFullYear()} Sunrise Apartments Ltd. All rights reserved.</p>
+          <p>
+            Site crafted by{" "}
+            <a
+              href="https://graphland.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gold hover:text-gold-light transition-colors"
+            >
+              Graphland
+            </a>
+          </p>
         </div>
       </div>
     </footer>
