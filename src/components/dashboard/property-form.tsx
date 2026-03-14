@@ -79,9 +79,30 @@ const propertyFormSchema = z.object({
   featured: z.boolean().optional(),
   imagesStr: z.string().optional(),
   featuresStr: z.string().optional(),
-  projectDetailsStr: z.string().optional(),
   brochureKey: z.string().optional(),
+  // Fixed project detail fields
+  projectName: z.string().optional(),
+  orientation: z.string().optional(),
+  frontRoad: z.string().optional(),
+  landSize: z.string().optional(),
+  apartmentSize: z.string().optional(),
+  numberOfUnit: z.string().optional(),
+  numberOfFloor: z.string().optional(),
+  apartmentContain: z.string().optional(),
+  developer: z.string().optional(),
 });
+
+const PROJECT_DETAIL_FIELDS = [
+  { key: "projectName" as const, label: "Project Name" },
+  { key: "orientation" as const, label: "Orientation" },
+  { key: "frontRoad" as const, label: "Front Road" },
+  { key: "landSize" as const, label: "Land size" },
+  { key: "apartmentSize" as const, label: "Apartment Size" },
+  { key: "numberOfUnit" as const, label: "Number of Unit" },
+  { key: "numberOfFloor" as const, label: "Number of Floor" },
+  { key: "apartmentContain" as const, label: "Apartment Contain" },
+  { key: "developer" as const, label: "Developer" },
+] as const;
 
 type PropertyFormValues = z.infer<typeof propertyFormSchema>;
 
@@ -108,11 +129,27 @@ function getDefaultValues(property?: Property | null): PropertyFormValues {
     featuresStr: Array.isArray(property?.features)
       ? property.features.join(", ")
       : "",
-    projectDetailsStr: Array.isArray(property?.projectDetails)
-      ? JSON.stringify(property.projectDetails, null, 2)
-      : "[]",
     brochureKey: property?.brochureKey ?? "",
+    ...getProjectDetailsDefaults(property?.projectDetails),
   };
+}
+
+function getProjectDetailsDefaults(
+  projectDetails?: Array<{ label?: string; value?: string }> | null,
+): Record<string, string> {
+  const map = new Map<string, string>();
+  if (Array.isArray(projectDetails)) {
+    for (const item of projectDetails) {
+      if (item?.label != null && item?.value != null) {
+        map.set(String(item.label).trim(), String(item.value).trim());
+      }
+    }
+  }
+  const out: Record<string, string> = {};
+  for (const { key, label } of PROJECT_DETAIL_FIELDS) {
+    out[key] = map.get(label) ?? "";
+  }
+  return out;
 }
 
 interface PropertyFormProps {
@@ -139,25 +176,12 @@ export function PropertyForm({ property }: PropertyFormProps) {
 
   const saveMutation = useMutation({
     mutationFn: async (values: PropertyFormValues) => {
-      let projectDetails: ProjectDetail[] = [];
-      try {
-        const parsed = JSON.parse(values.projectDetailsStr || "[]");
-        projectDetails = Array.isArray(parsed)
-          ? parsed.filter(
-              (x: unknown): x is ProjectDetail =>
-                x != null &&
-                typeof x === "object" &&
-                "label" in x &&
-                "value" in x &&
-                typeof (x as ProjectDetail).label === "string" &&
-                typeof (x as ProjectDetail).value === "string",
-            )
-          : [];
-      } catch {
-        throw new Error(
-          "Project details must be valid JSON array of { label, value }",
-        );
-      }
+      const projectDetails: ProjectDetail[] = PROJECT_DETAIL_FIELDS.map(
+        ({ label, key }) => ({
+          label,
+          value: (values[key] ?? "").trim(),
+        }),
+      );
       const body = {
         title: values.title.trim(),
         slug: values.slug.trim() || slugify(values.title),
@@ -696,15 +720,15 @@ export function PropertyForm({ property }: PropertyFormProps) {
             </CardContent>
           </Card>
 
-          {/* Media & details */}
+          {/* Media */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <FileImageIcon className="h-5 w-5" />
-                Media & project details
+                Media
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Image keys, features, project details and brochure
+                Gallery images, features and brochure
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -795,30 +819,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="projectDetailsStr"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project details (JSON)</FormLabel>
-                    <FormControl>
-                      <textarea
-                        {...field}
-                        disabled={saving}
-                        rows={5}
-                        className={`${inputClassName} font-mono`}
-                        placeholder='[{"label": "Front Road", "value": "40 ft"}, ...]'
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Array of objects with{" "}
-                      <code className="text-xs">label</code> and{" "}
-                      <code className="text-xs">value</code>.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <div className="space-y-2">
                 <Label>Brochure (PDF)</Label>
                 <div className="flex flex-col gap-2">
@@ -887,6 +887,44 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     </p>
                   )}
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Project details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <LayoutGridIcon className="h-5 w-5" />
+                Project details
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Fixed fields for project name, orientation, sizes and developer
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {PROJECT_DETAIL_FIELDS.map(({ key, label }) => (
+                  <FormField
+                    key={key}
+                    control={form.control}
+                    name={key}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{label}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value ?? ""}
+                            disabled={saving}
+                            placeholder={label}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
               </div>
             </CardContent>
           </Card>
