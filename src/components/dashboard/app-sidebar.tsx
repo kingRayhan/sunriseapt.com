@@ -41,7 +41,7 @@ const data = {
       url: "/dashboard/inquiries",
       icon: ClipboardListIcon,
     },
-    { title: "Team", url: "/dashboard/team", icon: UsersIcon },
+    // { title: "Team", url: "/dashboard/team", icon: UsersIcon },
     { title: "Gallery", url: "/dashboard/gallery", icon: CameraIcon },
   ],
   navSecondary: [
