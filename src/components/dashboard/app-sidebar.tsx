@@ -2,22 +2,16 @@
 
 import * as React from "react";
 import {
-  ArrowUpCircleIcon,
-  BarChartIcon,
+  Building2Icon,
   CameraIcon,
   ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
+  ExternalLinkIcon,
   FileTextIcon,
-  FolderIcon,
-  HelpCircleIcon,
   LayoutDashboardIcon,
-  ListIcon,
-  SearchIcon,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 import { NavDocuments } from "@/components/dashboard/nav-documents";
 import { NavMain } from "@/components/dashboard/nav-main";
@@ -35,118 +29,24 @@ import {
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: "Admin",
+    email: "admin@sunriseapt.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: LayoutDashboardIcon,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: ListIcon,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: BarChartIcon,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: UsersIcon,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: CameraIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboardIcon },
+    { title: "Properties", url: "/dashboard/properties", icon: Building2Icon },
+    { title: "Blog", url: "/dashboard/blog", icon: FileTextIcon },
+    { title: "Inquiries", url: "/dashboard/inquiries", icon: ClipboardListIcon },
+    { title: "Team", url: "/dashboard/team", icon: UsersIcon },
+    { title: "Gallery", url: "/dashboard/gallery", icon: CameraIcon },
   ],
   navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: SearchIcon,
-    },
+    { title: "View site", url: "/", icon: ExternalLinkIcon },
+    { title: "Settings", url: "/dashboard/settings", icon: SettingsIcon },
   ],
   documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
-    },
+    { name: "Reports", url: "/dashboard/reports", icon: ClipboardListIcon },
   ],
 };
 
@@ -160,10 +60,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <img
+                  src="/full-logo.png"
+                  alt=""
+                  className="h-6 w-auto"
+                />
+                <span className="text-base font-semibold group-data-[collapsible=icon]:hidden">Sunriseapt</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
