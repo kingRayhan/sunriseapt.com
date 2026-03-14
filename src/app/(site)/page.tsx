@@ -4,16 +4,35 @@ import PropertyCard from "@/components/PropertyCard";
 import { Button } from "@/components/ui/button";
 import { getGalleryImages } from "@/drizzle/queries/gallery";
 import { getFeaturedProperties } from "@/drizzle/queries/properties";
+import { getSiteSettings } from "@/drizzle/queries/settings";
+import { SETTING_KEYS } from "@/lib/settings-keys";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { HomeMapSection } from "./HomeMapSection";
 
 export const revalidate = 60;
 
+function getMapLocation(settings: Record<string, string>) {
+  const address = settings[SETTING_KEYS.address]?.trim() || null;
+  const latRaw = settings[SETTING_KEYS.address_lat]?.trim();
+  const lngRaw = settings[SETTING_KEYS.address_lng]?.trim();
+  const lat = latRaw ? Number.parseFloat(latRaw) : NaN;
+  const lng = lngRaw ? Number.parseFloat(lngRaw) : NaN;
+  const valid =
+    !Number.isNaN(lat) &&
+    !Number.isNaN(lng) &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng);
+  return valid ? { lat, lng, address } : null;
+}
+
 export default async function HomePage() {
-  const [featuredProperties, galleryImages] = await Promise.all([
+  const [featuredProperties, galleryImages, settings] = await Promise.all([
     getFeaturedProperties(),
     getGalleryImages(),
+    getSiteSettings(),
   ]);
+  const mapLocation = getMapLocation(settings);
 
   return (
     <>
@@ -124,31 +143,7 @@ export default async function HomePage() {
 
       <CompanyGallery images={galleryImages} />
 
-      {/* Map Section */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-3">
-              Our Locations
-            </h2>
-            <p className="text-muted-foreground">
-              Explore properties across South Florida
-            </p>
-          </div>
-          <div className="rounded-lg overflow-hidden shadow-lg border border-border">
-            <iframe
-              title="Property Locations"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d229688.1133788853!2d-80.34789824!3d25.78208485!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b0a20ec8c111%3A0xff96f271ddad4f65!2sMiami%2C%20FL!5e0!3m2!1sen!2sus!4v1710000000000!5m2!1sen!2sus"
-              width="100%"
-              height="450"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        </div>
-      </section>
+      <HomeMapSection mapLocation={mapLocation} />
     </>
   );
 }

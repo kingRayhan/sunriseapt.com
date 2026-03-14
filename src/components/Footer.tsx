@@ -1,83 +1,153 @@
-import Link from "next/link";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 
-const Footer = () => {
+export type FooterSocialLinks = {
+  facebook: string | null;
+  twitter: string | null;
+  instagram: string | null;
+  linkedin: string | null;
+  youtube: string | null;
+};
+
+export type FooterContactInfo = {
+  companyName: string | null;
+  address: string | null;
+  phones: string[];
+  emails: string[];
+};
+
+type FooterProps = {
+  socialLinks?: FooterSocialLinks;
+  contactInfo?: FooterContactInfo;
+};
+
+function Footer({ socialLinks, contactInfo }: FooterProps) {
+  const hasSocial =
+    socialLinks &&
+    (socialLinks.facebook ||
+      socialLinks.twitter ||
+      socialLinks.instagram ||
+      socialLinks.linkedin ||
+      socialLinks.youtube);
+
   return (
     <footer className="bg-primary text-primary-foreground">
-      <div className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          <div>
+      <div className="container mx-auto px-4 lg:px-8 py-14 lg:py-20">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-12 lg:gap-16 max-w-5xl">
+          <div className="max-w-md">
             <img
               src="/full-logo.png"
               alt="Sunrise Apartments"
-              className="h-12 w-auto mb-4 brightness-0 invert"
+              className="h-11 w-auto mb-5 brightness-0 invert"
             />
-            <p className="text-primary-foreground/70 text-sm leading-relaxed">
+            <p className="text-primary-foreground/80 text-sm leading-relaxed">
               Your trusted partner in finding the perfect property. We bring expertise, integrity, and personalized service to every transaction.
             </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
-              {[
-                { href: "/", label: "Home" },
-                { href: "/properties", label: "Properties" },
-                { href: "/about", label: "About Us" },
-                { href: "/blog", label: "Blog" },
-                { href: "/contact", label: "Contact" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-primary-foreground/70 hover:text-gold transition-colors"
+            {hasSocial && (
+              <div className="mt-6 flex flex-wrap gap-4">
+                {socialLinks!.facebook && (
+                  <a
+                    href={socialLinks.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-foreground/70 hover:text-gold transition-colors rounded-full p-1.5 hover:bg-primary-foreground/10"
+                    aria-label="Facebook"
                   >
-                    {link.label}
-                  </Link>
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {socialLinks!.twitter && (
+                  <a
+                    href={socialLinks.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-foreground/70 hover:text-gold transition-colors rounded-full p-1.5 hover:bg-primary-foreground/10"
+                    aria-label="Twitter / X"
+                  >
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                )}
+                {socialLinks!.instagram && (
+                  <a
+                    href={socialLinks.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-foreground/70 hover:text-gold transition-colors rounded-full p-1.5 hover:bg-primary-foreground/10"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {socialLinks!.linkedin && (
+                  <a
+                    href={socialLinks.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-foreground/70 hover:text-gold transition-colors rounded-full p-1.5 hover:bg-primary-foreground/10"
+                    aria-label="LinkedIn"
+                  >
+                    <Linkedin className="h-5 w-5" />
+                  </a>
+                )}
+                {socialLinks!.youtube && (
+                  <a
+                    href={socialLinks.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-foreground/70 hover:text-gold transition-colors rounded-full p-1.5 hover:bg-primary-foreground/10"
+                    aria-label="YouTube"
+                  >
+                    <Youtube className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 md:max-w-sm">
+            <h4 className="font-semibold text-base mb-5">Contact Us</h4>
+            <ul className="space-y-5 text-sm text-primary-foreground/80 leading-relaxed">
+              {contactInfo?.address && (
+                <li className="flex gap-3">
+                  <MapPin className="h-5 w-5 shrink-0 text-gold mt-0.5" />
+                  <span>{contactInfo.address}</span>
                 </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Property Types</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
-              <li>Apartments</li>
-              <li>Villas</li>
-              <li>Townhouses</li>
-              <li>Penthouses</li>
-              <li>Family Homes</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Contact Us</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-3 text-primary-foreground/70">
-                <MapPin className="h-4 w-4 mt-1 shrink-0 text-gold" />
-                <span>Garden Valley Matin, House # 36 Flat E-1, 5th Floor, Garibe-e-Newaz Avenue Sector# 13, Uttara, Dhaka-1230</span>
-              </li>
-              <li className="flex items-start gap-3 text-primary-foreground/70">
-                <Phone className="h-4 w-4 mt-0.5 shrink-0 text-gold" />
-                <span>+88 01713 841977<br />+88 01713 873 944</span>
-              </li>
-              <li className="flex items-start gap-3 text-primary-foreground/70">
-                <Mail className="h-4 w-4 mt-0.5 shrink-0 text-gold" />
-                <span>Sales@sunriseapt.com<br />Info@sunriseapt.com</span>
-              </li>
+              )}
+              {contactInfo?.phones && contactInfo.phones.length > 0 && (
+                <li className="flex gap-3">
+                  <Phone className="h-5 w-5 shrink-0 text-gold mt-0.5" />
+                  <span className="flex flex-col gap-1">
+                    {contactInfo.phones.map((phone, i) => (
+                      <span key={i}>{phone}</span>
+                    ))}
+                  </span>
+                </li>
+              )}
+              {contactInfo?.emails && contactInfo.emails.length > 0 && (
+                <li className="flex gap-3">
+                  <Mail className="h-5 w-5 shrink-0 text-gold mt-0.5" />
+                  <span className="flex flex-col gap-1">
+                    {contactInfo.emails.map((email, i) => (
+                      <span key={i}>{email}</span>
+                    ))}
+                  </span>
+                </li>
+              )}
+              {!contactInfo?.address && !(contactInfo?.phones?.length) && !(contactInfo?.emails?.length) && (
+                <li className="text-primary-foreground/50">No contact info configured.</li>
+              )}
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/20 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-primary-foreground/50">
-          <p>&copy; {new Date().getFullYear()} Sunrise Apartments Ltd. All rights reserved.</p>
+        <div className="border-t border-primary-foreground/20 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-primary-foreground/50">
+          <p>&copy; {new Date().getFullYear()} {contactInfo?.companyName || "Sunrise Apartments Ltd."}. All rights reserved.</p>
           <p>
             Site crafted by{" "}
             <a
               href="https://graphland.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gold hover:text-gold-light transition-colors"
+              className="text-gold hover:text-gold-light transition-colors font-medium"
             >
               Graphland
             </a>
@@ -86,6 +156,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+}
 
 export default Footer;

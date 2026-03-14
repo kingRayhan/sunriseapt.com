@@ -1,6 +1,5 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
 import {
   Building2Icon,
   CameraIcon,
@@ -9,7 +8,6 @@ import {
   FileTextIcon,
   LayoutDashboardIcon,
   SettingsIcon,
-  UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
@@ -19,7 +17,6 @@ import { NavSecondary } from "@/components/dashboard/nav-secondary";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -40,7 +37,7 @@ const data = {
     { title: "Gallery", url: "/dashboard/gallery", icon: CameraIcon },
   ],
   navSecondary: [
-    { title: "View site", url: "/", icon: ExternalLinkIcon },
+    { title: "View site", url: "/", icon: ExternalLinkIcon, external: true },
     { title: "Settings", url: "/dashboard/settings", icon: SettingsIcon },
   ],
   // documents: [

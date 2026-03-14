@@ -18,20 +18,20 @@ function getGoogleMapsTileUrl(): string {
   return `https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}${keyParam}`;
 }
 
-interface PropertyLocationMapProps {
-  lat: number;
-  lng: number;
-  title?: string;
+export interface LocationMapProps {
+  /** Single point to show on the map (lat, lng). */
+  points: { lat: number; lng: number };
+  /** Optional label for the marker popup. */
+  location?: string | null;
   className?: string;
 }
 
-export default function PropertyLocationMap({
-  lat,
-  lng,
-  title,
+export function LocationMap({
+  points,
+  location,
   className = "",
-}: PropertyLocationMapProps) {
-  const position: [number, number] = [lat, lng];
+}: LocationMapProps) {
+  const position: [number, number] = [points.lat, points.lng];
 
   useEffect(() => {
     const DefaultIcon = L.Icon.Default;
@@ -64,7 +64,7 @@ export default function PropertyLocationMap({
           maxZoom={20}
         />
         <Marker position={position}>
-          {title && <Popup>{title}</Popup>}
+          {location && <Popup>{location}</Popup>}
         </Marker>
       </MapContainer>
     </div>

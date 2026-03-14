@@ -20,8 +20,8 @@ import {
 } from "@/drizzle/queries/properties";
 import { formatPrice, getCdnImageUrl } from "@/lib/utils";
 
-const PropertyLocationMap = dynamic(
-  () => import("@/components/PropertyLocationMap"),
+const LocationMap = dynamic(
+  () => import("@/components/LocationMap").then((m) => ({ default: m.LocationMap })),
   { ssr: false },
 );
 
@@ -182,10 +182,9 @@ export default async function PropertyDetailsPage({ params }: Props) {
                 !Number.isNaN(Number(property.lng)) && (
                   <div className="space-y-2">
                     <h3 className="font-semibold">Location</h3>
-                    <PropertyLocationMap
-                      lat={Number(property.lat)}
-                      lng={Number(property.lng)}
-                      title={property.title}
+                    <LocationMap
+                      points={{ lat: Number(property.lat), lng: Number(property.lng) }}
+                      location={property.title}
                     />
                     <Button variant="outline" size="sm" className="w-full" asChild>
                       <Link
