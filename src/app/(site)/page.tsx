@@ -2,6 +2,7 @@ import CompanyGallery from "@/components/CompanyGallery";
 import HeroCarousel from "@/components/HeroCarousel";
 import PropertyCard from "@/components/PropertyCard";
 import { Button } from "@/components/ui/button";
+import { getGalleryImages } from "@/drizzle/queries/gallery";
 import { getFeaturedProperties } from "@/drizzle/queries/properties";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -9,7 +10,10 @@ import Link from "next/link";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const featuredProperties = await getFeaturedProperties();
+  const [featuredProperties, galleryImages] = await Promise.all([
+    getFeaturedProperties(),
+    getGalleryImages(),
+  ]);
 
   return (
     <>
@@ -118,7 +122,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <CompanyGallery />
+      <CompanyGallery images={galleryImages} />
 
       {/* Map Section */}
       <section className="py-16 lg:py-24">

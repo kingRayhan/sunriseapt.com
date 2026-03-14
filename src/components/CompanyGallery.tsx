@@ -1,53 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import type { GalleryImage } from "@/drizzle";
+import { getCdnBaseUrl, getCdnImageUrl } from "@/lib/utils";
 
-const galleryImages = [
-  {
-    src: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
-    alt: "Modern apartment exterior",
-    span: "md:col-span-2 md:row-span-2",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800",
-    alt: "Luxury living room interior",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800",
-    alt: "Swimming pool area",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-    alt: "Residential building facade",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800",
-    alt: "Apartment balcony view",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-    alt: "Landscaped garden",
-    span: "md:col-span-2",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-    alt: "Modern kitchen design",
-    span: "",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=800",
-    alt: "Rooftop lounge",
-    span: "",
-  },
-];
+function getSpanByIndex(index: number): string {
+  if (index === 0) return "md:col-span-2 md:row-span-2";
+  if (index === 5) return "md:col-span-2";
+  return "";
+}
 
-export default function CompanyGallery() {
+interface CompanyGalleryProps {
+  images: GalleryImage[];
+}
+
+export default function CompanyGallery({ images }: CompanyGalleryProps) {
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(!!images.length);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (images.length === 0) {
+      setLoading(false);
+      return;
+    }
+    if (getCdnBaseUrl()) {
+      const byKey: Record<string, string> = {};
+      images.forEach((img) => {
+        const url = getCdnImageUrl(img.imageKey);
+        if (url) byKey[img.imageKey] = url;
+      });
+      setUrls(byKey);
+      setLoading(false);
+      return;
+    }
+    const keys = images.map((img) => img.imageKey);
+    fetch("/api/storage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keys, operation: "get" }),
+    })
+      .then((res) => {
+        if (!res.ok)
+          return res
+            .json()
+            .then((d) =>
+              Promise.reject(new Error(d.error ?? "Failed to get URLs"))
+            );
+        return res.json();
+      })
+      .then((data: { urls?: string[]; url?: string }) => {
+        const list = data.urls ?? (data.url ? [data.url] : []);
+        const byKey: Record<string, string> = {};
+        keys.forEach((key, i) => {
+          if (list[i]) byKey[key] = list[i];
+        });
+        setUrls(byKey);
+      })
+      .catch(() => setUrls({}))
+      .finally(() => setLoading(false));
+  }, [images]);
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -55,14 +68,16 @@ export default function CompanyGallery() {
   const goPrev = () => {
     if (lightboxIndex === null) return;
     setLightboxIndex(
-      (lightboxIndex - 1 + galleryImages.length) % galleryImages.length,
+      (lightboxIndex - 1 + images.length) % images.length
     );
   };
 
   const goNext = () => {
     if (lightboxIndex === null) return;
-    setLightboxIndex((lightboxIndex + 1) % galleryImages.length);
+    setLightboxIndex((lightboxIndex + 1) % images.length);
   };
+
+  if (images.length === 0 && !loading) return null;
 
   return (
     <>
@@ -77,28 +92,43 @@ export default function CompanyGallery() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[220px]">
-            {galleryImages.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => openLightbox(index)}
-                className={`group relative rounded-lg overflow-hidden ${image.span}`}
-              >
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[220px]">
+              {images.map((_, index) => (
+                <div
+                  key={images[index].id}
+                  className={`animate-pulse rounded-lg bg-muted ${getSpanByIndex(index)}`}
                 />
-                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300" />
-              </button>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[220px]">
+              {images.map((image, index) => {
+                const src = urls[image.imageKey];
+                if (!src) return null;
+                return (
+                  <button
+                    key={image.id}
+                    onClick={() => openLightbox(index)}
+                    className={`group relative rounded-lg overflow-hidden ${getSpanByIndex(index)}`}
+                  >
+                    <img
+                      src={src}
+                      alt={image.altText ?? "Gallery image"}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Lightbox */}
-      {lightboxIndex !== null && (
+      {lightboxIndex !== null && images[lightboxIndex] && urls[images[lightboxIndex].imageKey] && (
         <div
           className="fixed inset-0 z-100 flex items-center justify-center bg-black/90"
           onClick={closeLightbox}
@@ -126,8 +156,8 @@ export default function CompanyGallery() {
           </button>
 
           <img
-            src={galleryImages[lightboxIndex].src.replace("w=800", "w=1600")}
-            alt={galleryImages[lightboxIndex].alt}
+            src={urls[images[lightboxIndex].imageKey]}
+            alt={images[lightboxIndex].altText ?? "Gallery image"}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
@@ -144,7 +174,7 @@ export default function CompanyGallery() {
           </button>
 
           <div className="absolute bottom-4 text-white/60 text-sm">
-            {lightboxIndex + 1} / {galleryImages.length}
+            {lightboxIndex + 1} / {images.length}
           </div>
         </div>
       )}

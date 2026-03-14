@@ -93,7 +93,7 @@ export async function DELETE(request: Request) {
     if (!key || typeof key !== "string" || key.trim() === "") {
       return NextResponse.json(
         { error: "Missing or invalid 'key' in request body" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const { deleteS3Object } = await import("@/lib/s3");
@@ -104,7 +104,7 @@ export async function DELETE(request: Request) {
       err instanceof Error ? err.message : "Failed to delete object";
     return NextResponse.json(
       { error: message },
-      { status: message.includes("Missing S3") ? 503 : 500 }
+      { status: message.includes("Missing S3") ? 503 : 500 },
     );
   }
 }
