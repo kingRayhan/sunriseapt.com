@@ -19,3 +19,17 @@ export function formatArea(area: number | string): string {
   if (Number.isNaN(num)) return "";
   return num.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
+
+/** Base URL for CDN (e.g. https://cdn.sunriseapt.com). Set via NEXT_PUBLIC_CDN_URL. */
+export function getCdnBaseUrl(): string | null {
+  const base = process.env.NEXT_PUBLIC_CDN_URL;
+  if (!base || typeof base !== "string") return null;
+  return base.replace(/\/$/, "");
+}
+
+/** Full URL for an image stored by key. Returns null if CDN base is not set. */
+export function getCdnImageUrl(key: string): string | null {
+  const base = getCdnBaseUrl();
+  if (!base || !key) return null;
+  return `${base}/${key.replace(/^\//, "")}`;
+}

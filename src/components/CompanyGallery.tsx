@@ -54,7 +54,9 @@ export default function CompanyGallery() {
 
   const goPrev = () => {
     if (lightboxIndex === null) return;
-    setLightboxIndex((lightboxIndex - 1 + galleryImages.length) % galleryImages.length);
+    setLightboxIndex(
+      (lightboxIndex - 1 + galleryImages.length) % galleryImages.length,
+    );
   };
 
   const goNext = () => {
@@ -68,7 +70,7 @@ export default function CompanyGallery() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-3">
-              Company Gallery
+              Gallery
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               A glimpse into our projects, spaces, and the quality we deliver
@@ -102,7 +104,10 @@ export default function CompanyGallery() {
           onClick={closeLightbox}
         >
           <button
-            onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              closeLightbox();
+            }}
             className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
             aria-label="Close lightbox"
           >
@@ -110,7 +115,10 @@ export default function CompanyGallery() {
           </button>
 
           <button
-            onClick={(e) => { e.stopPropagation(); goPrev(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              goPrev();
+            }}
             className="absolute left-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
             aria-label="Previous image"
           >
@@ -125,7 +133,10 @@ export default function CompanyGallery() {
           />
 
           <button
-            onClick={(e) => { e.stopPropagation(); goNext(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              goNext();
+            }}
             className="absolute right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
             aria-label="Next image"
           >
