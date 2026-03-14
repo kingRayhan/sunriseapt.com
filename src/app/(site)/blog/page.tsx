@@ -9,11 +9,13 @@ export const revalidate = 60;
 export default async function BlogPage() {
   const blogPosts = await getPublishedPosts();
   return (
-    <div className="pt-20 lg:pt-24">
+    <div className="pt-20">
       <div className="bg-primary text-primary-foreground py-12 lg:py-16">
         <div className="container mx-auto px-4 lg:px-8">
           <h1 className="text-3xl lg:text-4xl font-bold mb-2">Blog & News</h1>
-          <p className="text-primary-foreground/70">Insights, tips, and market updates</p>
+          <p className="text-primary-foreground/70">
+            Insights, tips, and market updates
+          </p>
         </div>
       </div>
 
@@ -37,13 +39,19 @@ export default async function BlogPage() {
                     <Badge variant="secondary">{post.category}</Badge>
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
-                      {new Date(post.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                      {new Date(post.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </span>
                   </div>
                   <h2 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors mb-2">
                     {post.title}
                   </h2>
-                  <p className="text-sm text-muted-foreground mb-4">{post.excerpt}</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {post.excerpt}
+                  </p>
                   <span className="inline-flex items-center text-sm font-medium text-primary">
                     Read More <ArrowRight className="ml-1 h-4 w-4" />
                   </span>

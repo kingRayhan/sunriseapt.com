@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/properties", label: "Properties" },
-  { href: "/about", label: "About" },
+  // { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
@@ -79,8 +79,13 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="mt-2 px-4">
-                <Button asChild className="w-full bg-gold hover:bg-gold-dark text-white">
-                  <Link href="/contact" onClick={() => setIsOpen(false)}>Get in Touch</Link>
+                <Button
+                  asChild
+                  className="w-full bg-gold hover:bg-gold-dark text-white"
+                >
+                  <Link href="/contact" onClick={() => setIsOpen(false)}>
+                    Get in Touch
+                  </Link>
                 </Button>
               </div>
             </div>
