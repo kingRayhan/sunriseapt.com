@@ -1,6 +1,8 @@
 import PropertyFilters from "@/components/PropertyFilters";
 import { getProperties } from "@/drizzle/queries/properties";
 
+export const revalidate = 60;
+
 export default async function PropertiesPage() {
   const properties = await getProperties();
 

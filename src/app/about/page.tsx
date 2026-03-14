@@ -2,6 +2,8 @@ import { Target, Eye, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTeamMembers } from "@/drizzle/queries/team";
 
+export const revalidate = 60;
+
 export default async function AboutPage() {
   const teamMembers = await getTeamMembers();
 

@@ -1,5 +1,3 @@
-"use server";
-
 import Link from "next/link";
 import { Calendar, ArrowLeft, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +7,8 @@ import { getPostBySlug } from "@/drizzle/queries/blog";
 interface Props {
   params: { id: string };
 }
+
+export const revalidate = 60;
 
 export default async function BlogPostPage({ params }: Props) {
   const post = await getPostBySlug(params.id);
@@ -49,20 +49,33 @@ export default async function BlogPostPage({ params }: Props) {
           <Badge variant="secondary">{post.category}</Badge>
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            {new Date(post.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            {new Date(post.date).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
           </span>
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <User className="h-4 w-4" /> {post.author}
           </span>
         </div>
 
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-6">{post.title}</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-6">
+          {post.title}
+        </h1>
 
         <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
           {post.content.split("\n\n").map((paragraph, i) => (
-            <p key={i} className="mb-4" dangerouslySetInnerHTML={{
-              __html: paragraph.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground">$1</strong>')
-            }} />
+            <p
+              key={i}
+              className="mb-4"
+              dangerouslySetInnerHTML={{
+                __html: paragraph.replace(
+                  /\*\*(.*?)\*\*/g,
+                  '<strong class="text-foreground">$1</strong>',
+                ),
+              }}
+            />
           ))}
         </div>
       </article>

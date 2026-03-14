@@ -6,6 +6,8 @@ import { getFeaturedProperties } from "@/drizzle/queries/properties";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const featuredProperties = await getFeaturedProperties();
 

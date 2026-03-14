@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getPublishedPosts } from "@/drizzle/queries/blog";
 
+export const revalidate = 60;
+
 export default async function BlogPage() {
   const blogPosts = await getPublishedPosts();
   return (
