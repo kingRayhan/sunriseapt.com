@@ -1,3 +1,4 @@
+import { UserButton } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -10,7 +11,15 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium">Documents</h1>
+        <h1 className="text-base font-medium flex-1">Dashboard</h1>
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              avatarBox: "h-8 w-8",
+            },
+          }}
+        />
       </div>
     </header>
   );

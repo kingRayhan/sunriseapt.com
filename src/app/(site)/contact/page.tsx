@@ -21,7 +21,6 @@ const contactFormSchema = z.object({
 });
 
 export default function ContactPage() {
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {

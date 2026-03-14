@@ -1,6 +1,12 @@
+"use server";
+
 import { eq, desc } from "drizzle-orm";
 import { db } from "../db";
-import { contactInquiriesTable, propertiesTable, type NewContactInquiry } from "../schema";
+import {
+  contactInquiriesTable,
+  propertiesTable,
+  type NewContactInquiry,
+} from "../schema";
 
 export async function submitContactInquiry(
   inquiry: Omit<NewContactInquiry, "id" | "status" | "createdAt">,
@@ -44,10 +50,7 @@ export async function getInquiryById(id: string) {
   return rows[0] ?? null;
 }
 
-export async function updateInquiry(
-  id: string,
-  data: { status?: string },
-) {
+export async function updateInquiry(id: string, data: { status?: string }) {
   const [row] = await db
     .update(contactInquiriesTable)
     .set(data)
@@ -57,5 +60,7 @@ export async function updateInquiry(
 }
 
 export async function deleteInquiry(id: string) {
-  await db.delete(contactInquiriesTable).where(eq(contactInquiriesTable.id, id));
+  await db
+    .delete(contactInquiriesTable)
+    .where(eq(contactInquiriesTable.id, id));
 }

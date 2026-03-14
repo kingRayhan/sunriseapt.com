@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton } from "@clerk/nextjs";
 import {
   Building2Icon,
   CameraIcon,
@@ -15,7 +16,6 @@ import * as React from "react";
 
 import { NavMain } from "@/components/dashboard/nav-main";
 import { NavSecondary } from "@/components/dashboard/nav-secondary";
-import { NavUser } from "@/components/dashboard/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -27,11 +27,6 @@ import {
 } from "@/components/ui/sidebar";
 
 const data = {
-  user: {
-    name: "Admin",
-    email: "admin@sunriseapt.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboardIcon },
     { title: "Properties", url: "/dashboard/properties", icon: Building2Icon },
@@ -75,9 +70,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavDocuments items={data.documents} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      {/* <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex w-full items-center justify-start px-2 py-1.5">
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    rootBox: "w-full",
+                    avatarBox: "h-8 w-8 rounded-lg",
+                  },
+                }}
+              />
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter> */}
     </Sidebar>
   );
 }
