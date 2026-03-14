@@ -62,7 +62,7 @@ export default async function AboutPage() {
                 text: "Honesty, expertise, and commitment. We treat every client like family, offering honest advice and going above and beyond to deliver results.",
               },
             ].map((item) => (
-              <Card key={item.title} className="border-none shadow-sm">
+              <Card key={item.title} className="border-none shadow-xs">
                 <CardContent className="p-8 text-center">
                   <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
                     <item.icon className="h-7 w-7 text-primary" />
@@ -91,7 +91,7 @@ export default async function AboutPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {teamMembers.map((member) => (
               <Card key={member.id} className="overflow-hidden border-border">
-                <div className="aspect-[3/4] overflow-hidden">
+                <div className="aspect-3/4 overflow-hidden">
                   <img
                     src={member.imageKey ?? ""}
                     alt={member.name}

@@ -98,7 +98,7 @@ export default function CompanyGallery() {
       {/* Lightbox */}
       {lightboxIndex !== null && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90"
           onClick={closeLightbox}
         >
           <button

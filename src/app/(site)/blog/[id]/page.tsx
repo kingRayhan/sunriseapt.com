@@ -35,7 +35,7 @@ export default async function BlogPostPage({ params }: Props) {
       </div>
 
       <article className="container mx-auto px-4 lg:px-8 pb-16 max-w-3xl">
-        <div className="aspect-[16/9] rounded-lg overflow-hidden mb-8">
+        <div className="aspect-video rounded-lg overflow-hidden mb-8">
           {post.imageKey && (
             <img
               src={post.imageKey}

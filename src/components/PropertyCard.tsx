@@ -13,7 +13,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
     <Link href={`/properties/${property.slug}`}>
       <Card className="group overflow-hidden border-border hover:shadow-lg transition-all duration-300">
-        <div className="relative overflow-hidden aspect-[4/3]">
+        <div className="relative overflow-hidden aspect-4/3">
           {property.images[0] && (
             <img
               src={property.images[0]}

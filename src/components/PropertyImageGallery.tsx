@@ -15,7 +15,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
 
   return (
     <div className="mb-16">
-      <div className="relative rounded-lg overflow-hidden aspect-[16/9] max-h-[500px]">
+      <div className="relative rounded-lg overflow-hidden aspect-video max-h-[500px]">
         <img
           src={images[currentImage]}
           alt={`${title} - Image ${currentImage + 1}`}

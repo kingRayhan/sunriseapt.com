@@ -666,7 +666,7 @@ export default function Page() {
 - `sizes` - Responsive sizes
 - `quality` - 1-100 (default 75)
 - `priority` - Preload image
-- `placeholder` - 'blur-sm' | 'empty'
+- `placeholder` - 'blur-xs' | 'empty'
 - `blurDataURL` - Data URL for blur
 
 ### Remote Image Configuration

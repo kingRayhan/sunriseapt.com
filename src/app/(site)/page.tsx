@@ -29,7 +29,7 @@ export default async function HomePage() {
                 apartments that are both stylish and eco-friendly.
               </p>
             </div>
-            <div className="rounded-lg overflow-hidden aspect-[4/3]">
+            <div className="rounded-lg overflow-hidden aspect-4/3">
               <img
                 src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800"
                 alt="Nature and sustainability"
@@ -46,7 +46,7 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="rounded-lg overflow-hidden aspect-[4/3]">
+            <div className="rounded-lg overflow-hidden aspect-4/3">
               <img
                 src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800"
                 alt="Construction and development"
@@ -63,7 +63,7 @@ export default async function HomePage() {
                 redefining urban living with excellence.
               </p>
             </div>
-            <div className="relative rounded-lg overflow-hidden aspect-[4/3]">
+            <div className="relative rounded-lg overflow-hidden aspect-4/3">
               <img
                 src="https://images.unsplash.com/photo-1563811771046-ba984ff30900?w=800"
                 alt="Building with care"

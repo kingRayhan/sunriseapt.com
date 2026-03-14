@@ -24,7 +24,7 @@ export default async function BlogPage() {
           {blogPosts.map((post) => (
             <Link key={post.id} href={`/blog/${post.slug}`}>
               <Card className="group overflow-hidden border-border hover:shadow-lg transition-all duration-300 h-full">
-                <div className="aspect-[16/9] overflow-hidden">
+                <div className="aspect-video overflow-hidden">
                   {post.imageKey && (
                     <img
                       src={post.imageKey}
