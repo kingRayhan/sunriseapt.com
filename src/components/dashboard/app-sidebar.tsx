@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   Building2Icon,
   CameraIcon,
@@ -12,8 +11,8 @@ import {
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
+import * as React from "react";
 
-import { NavDocuments } from "@/components/dashboard/nav-documents";
 import { NavMain } from "@/components/dashboard/nav-main";
 import { NavSecondary } from "@/components/dashboard/nav-secondary";
 import { NavUser } from "@/components/dashboard/nav-user";
