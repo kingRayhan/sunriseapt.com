@@ -3,7 +3,7 @@ import { Bed, Bath, Maximize } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { type Property } from "@/drizzle";
-import { formatArea } from "@/lib/utils";
+import { formatArea, getCdnImageUrl } from "@/lib/utils";
 
 interface PropertyCardProps {
   property: Property;
@@ -13,15 +13,15 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
     <Link href={`/properties/${property.slug}`}>
       <Card className="group overflow-hidden border-border hover:shadow-lg transition-all duration-300">
-        <div className="relative overflow-hidden aspect-4/3">
-          {property.images[0] && (
+        <div className="relative overflow-hidden aspect-4/3 bg-muted">
+          {property.images[0] && getCdnImageUrl(property.images[0]) ? (
             <img
-              src={property.images[0]}
+              src={getCdnImageUrl(property.images[0])!}
               alt={property.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
             />
-          )}
+          ) : null}
           <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground capitalize">
             {property.type}
           </Badge>

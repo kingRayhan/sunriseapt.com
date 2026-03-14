@@ -1,6 +1,7 @@
 import { Target, Eye, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTeamMembers } from "@/drizzle/queries/team";
+import { getCdnImageUrl } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -92,12 +93,16 @@ export default async function AboutPage() {
             {teamMembers.map((member) => (
               <Card key={member.id} className="overflow-hidden border-border">
                 <div className="aspect-3/4 overflow-hidden">
-                  <img
-                    src={member.imageKey ?? ""}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                  {member.imageKey && getCdnImageUrl(member.imageKey) ? (
+                    <img
+                      src={getCdnImageUrl(member.imageKey)!}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted" aria-hidden />
+                  )}
                 </div>
                 <CardContent className="p-5 text-center">
                   <h3 className="font-semibold text-foreground">

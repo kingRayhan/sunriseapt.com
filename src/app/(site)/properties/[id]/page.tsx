@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   Bed,
@@ -17,7 +18,12 @@ import {
   getPropertyBySlug,
   getRelatedProperties,
 } from "@/drizzle/queries/properties";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, getCdnImageUrl } from "@/lib/utils";
+
+const PropertyLocationMap = dynamic(
+  () => import("@/components/PropertyLocationMap"),
+  { ssr: false },
+);
 
 interface Props {
   params: { id: string };
@@ -29,6 +35,10 @@ export default async function PropertyDetailsPage({ params }: Props) {
   const property = await getPropertyBySlug(params.id);
 
   if (!property) notFound();
+
+  const propertyImageUrls = property.images
+    .map((key) => getCdnImageUrl(key))
+    .filter((url): url is string => url != null);
 
   const relatedProperties = await getRelatedProperties(
     property.id,
@@ -50,7 +60,7 @@ export default async function PropertyDetailsPage({ params }: Props) {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <PropertyImageGallery
-              images={property.images}
+              images={propertyImageUrls}
               title={property.title}
             />
 
@@ -148,9 +158,13 @@ export default async function PropertyDetailsPage({ params }: Props) {
                 <h3 className="font-semibold mb-4">
                   Interested in this property?
                 </h3>
-                {property.brochureKey && (
+                {property.brochureKey && getCdnImageUrl(property.brochureKey) && (
                   <Button className="w-full mb-3" asChild>
-                    <Link href={property.brochureKey}>
+                    <Link
+                      href={getCdnImageUrl(property.brochureKey)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <DownloadIcon className="h-4 w-4" />
                       Download Brochure
                     </Link>
@@ -162,19 +176,29 @@ export default async function PropertyDetailsPage({ params }: Props) {
                 </Button>
               </div>
 
-              {property.lat && property.lng && (
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <iframe
-                    title="Property Location"
-                    src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d${property.lng}!3d${property.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s!5e0!3m2!1sen!2sus`}
-                    width="100%"
-                    height="250"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                  />
-                </div>
-              )}
+              {property.lat != null &&
+                property.lng != null &&
+                !Number.isNaN(Number(property.lat)) &&
+                !Number.isNaN(Number(property.lng)) && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold">Location</h3>
+                    <PropertyLocationMap
+                      lat={Number(property.lat)}
+                      lng={Number(property.lng)}
+                      title={property.title}
+                    />
+                    <Button variant="outline" size="sm" className="w-full" asChild>
+                      <Link
+                        href={`https://www.google.com/maps?q=${Number(property.lat)},${Number(property.lng)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Open in Google Maps
+                      </Link>
+                    </Button>
+                  </div>
+                )}
             </div>
           </div>
         </div>

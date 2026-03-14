@@ -3,6 +3,7 @@ import { Calendar, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getPublishedPosts } from "@/drizzle/queries/blog";
+import { getCdnImageUrl } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -25,9 +26,9 @@ export default async function BlogPage() {
             <Link key={post.id} href={`/blog/${post.slug}`}>
               <Card className="group overflow-hidden border-border hover:shadow-lg transition-all duration-300 h-full">
                 <div className="aspect-video overflow-hidden">
-                  {post.imageKey && (
+                  {post.imageKey && getCdnImageUrl(post.imageKey) && (
                     <img
-                      src={post.imageKey}
+                      src={getCdnImageUrl(post.imageKey)!}
                       alt={post.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"

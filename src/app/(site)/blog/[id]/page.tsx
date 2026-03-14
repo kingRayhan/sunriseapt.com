@@ -3,6 +3,7 @@ import { Calendar, ArrowLeft, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getPostBySlug } from "@/drizzle/queries/blog";
+import { getCdnImageUrl } from "@/lib/utils";
 
 interface Props {
   params: { id: string };
@@ -36,9 +37,9 @@ export default async function BlogPostPage({ params }: Props) {
 
       <article className="container mx-auto px-4 lg:px-8 pb-16 max-w-3xl">
         <div className="aspect-video rounded-lg overflow-hidden mb-8">
-          {post.imageKey && (
+          {post.imageKey && getCdnImageUrl(post.imageKey) && (
             <img
-              src={post.imageKey}
+              src={getCdnImageUrl(post.imageKey)!}
               alt={post.title}
               className="w-full h-full object-cover"
             />

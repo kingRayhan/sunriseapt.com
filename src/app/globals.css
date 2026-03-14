@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @plugin 'tailwindcss-animate';
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -209,4 +210,16 @@
       -apple-system,
       sans-serif;
   }
+}
+
+/* Rich text editor: apply typography plugin styles with theme colors */
+.rich-text-editor .ProseMirror {
+  --tw-prose-body: hsl(var(--foreground));
+  --tw-prose-headings: hsl(var(--foreground));
+  --tw-prose-links: hsl(var(--primary));
+  --tw-prose-bold: hsl(var(--foreground));
+  --tw-prose-quotes: hsl(var(--muted-foreground));
+  --tw-prose-quote-borders: hsl(var(--primary));
+  --tw-prose-code: hsl(var(--foreground));
+  --tw-prose-hr: hsl(var(--border));
 }

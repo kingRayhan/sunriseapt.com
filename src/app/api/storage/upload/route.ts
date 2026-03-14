@@ -18,6 +18,7 @@ function generateKey(prefix: string, fileName: string, mimeType: string): string
  * POST /api/storage/upload – upload a file to S3/R2 from the server (same-origin).
  * Body: multipart/form-data with "file" and optional "prefix" (default "gallery").
  * - prefix "gallery": images only. Returns { key } for gallery.
+ * - prefix "blog": images only. Returns { key } for blog feature image.
  * - prefix "brochures": PDFs (and optionally other docs). Returns { key } for brochure.
  */
 export async function POST(request: Request) {
@@ -31,9 +32,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    if (prefix === "gallery" && !file.type.startsWith("image/")) {
+    if ((prefix === "gallery" || prefix === "blog") && !file.type.startsWith("image/")) {
       return NextResponse.json(
-        { error: "Gallery uploads must be images" },
+        { error: "Upload must be an image" },
         { status: 400 }
       );
     }
