@@ -1,8 +1,11 @@
 import Navbar from "@/components/Navbar";
-import React from "react";
-import { Footer } from "react-day-picker";
+import Footer from "@/components/Footer";
 
-const Layout: React.FC<React.PropsWithChildren> = ({ children }) => {
+export default function SiteLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -10,6 +13,4 @@ const Layout: React.FC<React.PropsWithChildren> = ({ children }) => {
       <Footer />
     </div>
   );
-};
-
-export default Layout;
+}
