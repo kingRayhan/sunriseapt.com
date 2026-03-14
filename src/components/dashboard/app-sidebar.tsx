@@ -37,7 +37,11 @@ const data = {
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboardIcon },
     { title: "Properties", url: "/dashboard/properties", icon: Building2Icon },
     { title: "Blog", url: "/dashboard/blog", icon: FileTextIcon },
-    { title: "Inquiries", url: "/dashboard/inquiries", icon: ClipboardListIcon },
+    {
+      title: "Inquiries",
+      url: "/dashboard/inquiries",
+      icon: ClipboardListIcon,
+    },
     { title: "Team", url: "/dashboard/team", icon: UsersIcon },
     { title: "Gallery", url: "/dashboard/gallery", icon: CameraIcon },
   ],
@@ -61,12 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <Link href="/dashboard" className="flex items-center gap-2">
-                <img
-                  src="/full-logo.png"
-                  alt=""
-                  className="h-6 w-auto"
-                />
-                <span className="text-base font-semibold group-data-[collapsible=icon]:hidden">Sunriseapt</span>
+                <img src="/full-logo.png" alt="" className="h-6 w-auto" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
