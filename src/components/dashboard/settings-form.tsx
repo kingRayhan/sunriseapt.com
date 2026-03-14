@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2Icon, PlusIcon, Trash2Icon, LinkIcon, MailIcon, MessageCircleIcon, ImageIcon } from "lucide-react";
+import { Loader2Icon, PlusIcon, Trash2Icon, LinkIcon, MailIcon, MessageCircleIcon, ImageIcon, UploadIcon } from "lucide-react";
 import { SETTING_KEYS, type HomeSliderSlide } from "@/lib/settings-keys";
+import { getCdnImageUrl } from "@/lib/utils";
 
 const LocationMap = dynamic(
   () =>
@@ -131,6 +132,49 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
   const saveHomeSlider = () => {
     save({ [SETTING_KEYS.home_slider]: sliderSlides });
   };
+
+  const sliderUploadRef = useRef<HTMLInputElement>(null);
+  const sliderUploadIndexRef = useRef<number>(0);
+  const [uploadingSlideIndex, setUploadingSlideIndex] = useState<number | null>(null);
+  const [sliderUploadError, setSliderUploadError] = useState<string | null>(null);
+
+  function triggerSliderUpload(index: number) {
+    setSliderUploadError(null);
+    sliderUploadIndexRef.current = index;
+    setUploadingSlideIndex(index);
+    sliderUploadRef.current?.click();
+  }
+
+  async function handleSliderImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !file.type.startsWith("image/")) {
+      setSliderUploadError("Please select an image file.");
+      setUploadingSlideIndex(null);
+      return;
+    }
+    const index = sliderUploadIndexRef.current;
+    setSliderUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+      formData.set("prefix", "hero");
+      const res = await fetch("/api/storage/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error ?? "Upload failed");
+      }
+      const { key } = await res.json();
+      updateSlide(index, "imageKey", key);
+    } catch (err) {
+      setSliderUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingSlideIndex(null);
+    }
+  }
 
   const updatePhone = (index: number, value: string) => {
     setContactPhones((prev) => {
@@ -426,9 +470,21 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
           <Card>
             <CardHeader>
               <CardTitle>Home slider</CardTitle>
-              <CardDescription>Slides for the homepage hero carousel. Image key = S3/key or CDN path.</CardDescription>
+              <CardDescription>Slides for the homepage hero carousel. Upload an image or enter the image key.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <input
+                ref={sliderUploadRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                aria-hidden
+                disabled={saving || uploadingSlideIndex !== null}
+                onChange={handleSliderImageUpload}
+              />
+              {sliderUploadError && (
+                <p className="text-sm text-destructive">{sliderUploadError}</p>
+              )}
               {sliderSlides.map((slide, index) => (
                 <div
                   key={index}
@@ -449,12 +505,69 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-2 sm:col-span-2">
-                      <Label>Image key</Label>
+                      <Label>Slide image</Label>
+                      {slide.imageKey && getCdnImageUrl(slide.imageKey) ? (
+                        <div className="flex flex-col gap-2">
+                          <div className="relative w-full max-w-xs aspect-video rounded-md border overflow-hidden bg-muted">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={getCdnImageUrl(slide.imageKey)!}
+                              alt={slide.title ?? `Slide ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => triggerSliderUpload(index)}
+                              disabled={saving || uploadingSlideIndex !== null}
+                            >
+                              {uploadingSlideIndex === index ? (
+                                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <UploadIcon className="mr-2 h-4 w-4" />
+                              )}
+                              Replace image
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => updateSlide(index, "imageKey", "")}
+                              disabled={saving}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              Remove image
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => triggerSliderUpload(index)}
+                            disabled={saving || uploadingSlideIndex !== null}
+                          >
+                            {uploadingSlideIndex === index ? (
+                              <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <UploadIcon className="mr-2 h-4 w-4" />
+                            )}
+                            Upload image
+                          </Button>
+                          <span className="text-xs text-muted-foreground">or enter key below</span>
+                        </div>
+                      )}
                       <Input
-                        placeholder="hero/slide-1.jpg"
+                        placeholder="hero/slide-1.jpg (or use upload)"
                         value={slide.imageKey}
                         onChange={(e) => updateSlide(index, "imageKey", e.target.value)}
                         disabled={saving}
+                        className="mt-1"
                       />
                     </div>
                     <div className="space-y-2">
