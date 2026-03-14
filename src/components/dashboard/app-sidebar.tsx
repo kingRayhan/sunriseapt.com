@@ -49,9 +49,9 @@ const data = {
     { title: "View site", url: "/", icon: ExternalLinkIcon },
     { title: "Settings", url: "/dashboard/settings", icon: SettingsIcon },
   ],
-  documents: [
-    { name: "Reports", url: "/dashboard/reports", icon: ClipboardListIcon },
-  ],
+  // documents: [
+  //   { name: "Reports", url: "/dashboard/reports", icon: ClipboardListIcon },
+  // ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -73,7 +73,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+        {/* <NavDocuments items={data.documents} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
