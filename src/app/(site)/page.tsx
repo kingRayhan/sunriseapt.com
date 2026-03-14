@@ -1,14 +1,17 @@
 import CompanyGallery from "@/components/CompanyGallery";
-import HeroCarousel from "@/components/HeroCarousel";
 import PropertyCard from "@/components/PropertyCard";
 import { Button } from "@/components/ui/button";
 import { getGalleryImages } from "@/drizzle/queries/gallery";
 import { getFeaturedProperties } from "@/drizzle/queries/properties";
 import { getSiteSettings } from "@/drizzle/queries/settings";
 import { SETTING_KEYS } from "@/lib/settings-keys";
+import HeroCarousel from "@/components/HeroCarousel";
+import { getCdnImageUrl } from "@/lib/utils";
+import type { HomeSliderSlide } from "@/lib/settings-keys";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { HomeMapSection } from "./HomeMapSection";
+import type { HeroSlide } from "@/components/HeroCarousel";
 
 export const revalidate = 60;
 
@@ -26,6 +29,27 @@ function getMapLocation(settings: Record<string, string>) {
   return valid ? { lat, lng, address } : null;
 }
 
+function parseHomeSlider(settings: Record<string, string>): HomeSliderSlide[] {
+  const raw = settings[SETTING_KEYS.home_slider]?.trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? (parsed as HomeSliderSlide[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function getHeroSlides(settings: Record<string, string>): HeroSlide[] {
+  const slides = parseHomeSlider(settings);
+  const result: HeroSlide[] = [];
+  for (const s of slides) {
+    const image = getCdnImageUrl(s.imageKey);
+    if (image) result.push({ image, title: s.title, subtitle: s.subtitle, link: s.link });
+  }
+  return result;
+}
+
 export default async function HomePage() {
   const [featuredProperties, galleryImages, settings] = await Promise.all([
     getFeaturedProperties(),
@@ -33,10 +57,11 @@ export default async function HomePage() {
     getSiteSettings(),
   ]);
   const mapLocation = getMapLocation(settings);
+  const heroSlides = getHeroSlides(settings);
 
   return (
     <>
-      <HeroCarousel />
+      <HeroCarousel slides={heroSlides} />
 
       {/* About / Mission / Vision */}
       <section className="py-16 lg:py-24">
