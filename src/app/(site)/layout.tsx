@@ -4,6 +4,10 @@ import { SupportChatPopup } from "@/components/SupportChatPopup";
 import { getSiteSettings } from "@/drizzle/queries/settings";
 import { SETTING_KEYS } from "@/lib/settings-keys";
 
+// Force static generation + ISR for all public site pages (not dashboard)
+export const dynamic = "force-static";
+export const revalidate = 60;
+
 export default async function SiteLayout({
   children,
 }: {

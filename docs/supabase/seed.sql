@@ -163,6 +163,31 @@ INSERT INTO properties (title, slug, description, price, type, status, bedrooms,
     {"label": "Apartment Contain", "value": "01 Bed, 1 Bath, Living & Kitchen, Mezzanine"},
     {"label": "Developer", "value": "Sunrise Apartments Ltd."}
   ]'::JSONB
+),
+
+(
+  'Sunrise Mohammad Ali Premium Residence',
+  'sunrise-mohammad-ali-premium-residence',
+  E'Dear valued clients of "Sunrise Apartments Ltd." Situated in a peaceful yet accessible area, "Sunrise Premium residence" enjoys stunning views that bring a touch of nature to urban living. It''s conveniently close to the educational institute, super shop, commercial hub and medical facilities, making life easier for future residents. The layout of the apartments has been smartly designed to capture natural light and fresh air while keeping noise at bay. Beautiful landscaping adds to the charm, creating a relaxing environment. Safety has been a top priority. The site incorporates modern security systems, ensuring a safe and secure living space for all. I am truly thrilled to be part of this project and can''t wait to see the remarkable Sunrise Premium Residence come to life.',
+  0, 'apartment', 'available', 4, 3, 1929, NULL,
+  'Uttara Sector-10, Dhaka', 'Plot 117, Road # 7/B, Uttara Sector-10, Dhaka-1230.',
+  23.8756, 90.3792, TRUE,
+  '[]'::JSONB,
+  '["Natural Light", "Landscaping", "Modern Security", "South Facing", "High Speed Elevators", "Car Parking"]'::JSONB,
+  '[
+    {"label": "Project Name", "value": "Sunrise Mohammad Ali Premium Residence"},
+    {"label": "Project Address", "value": "Plot 117, Road # 7/B, Uttara Sector-10, Dhaka-1230."},
+    {"label": "Building Height", "value": "12-Storied (1 B + G + 11)"},
+    {"label": "Building Type", "value": "Condominium Project"},
+    {"label": "Land size", "value": "34.20 Katha"},
+    {"label": "Apartment Size", "value": "1655-2203 Sft. 3 & 4 Bedroom"},
+    {"label": "Orientation", "value": "South facing"},
+    {"label": "Number of Unit", "value": "86 Nos."},
+    {"label": "Number of Parking", "value": "90 Nos. Car Parking (Approx.)"},
+    {"label": "No of Lift", "value": "5 Nos. High Speed Elevator"},
+    {"label": "Consultant", "value": "South Haven Architect"},
+    {"label": "Developer", "value": "Sunrise Apartments Ltd."}
+  ]'::JSONB
 );
 
 

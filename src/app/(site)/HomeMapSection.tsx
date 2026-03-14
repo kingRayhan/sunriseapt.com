@@ -1,9 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { LocationMap } from "@/components/LocationMap";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const LocationMap = dynamic(
+  () => import("@/components/LocationMap").then((m) => ({ default: m.LocationMap })),
+  { ssr: false },
+);
 
 export type HomeMapLocation = {
   lat: number;

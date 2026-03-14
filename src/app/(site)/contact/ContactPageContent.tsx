@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,7 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { submitContactInquiry } from "@/drizzle/queries/contact";
-import { LocationMap } from "@/components/LocationMap";
+
+const LocationMap = dynamic(
+  () => import("@/components/LocationMap").then((m) => ({ default: m.LocationMap })),
+  { ssr: false },
+);
 
 const contactFormSchema = z.object({
   name: z.string().min(2, "Please enter your full name."),
