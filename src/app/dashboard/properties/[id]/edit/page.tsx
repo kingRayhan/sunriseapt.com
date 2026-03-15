@@ -1,3 +1,4 @@
+import { PropertyForm } from "@/components/dashboard/property-form";
 import { getPropertyById } from "@/drizzle/queries/properties";
 import { notFound } from "next/navigation";
 
@@ -12,8 +13,7 @@ export default async function EditPropertyPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
-      <pre>{JSON.stringify(property, null, 2)}</pre>
-      {/* <PropertyForm property={property} /> */}
+      <PropertyForm property={property} />
     </div>
   );
 }

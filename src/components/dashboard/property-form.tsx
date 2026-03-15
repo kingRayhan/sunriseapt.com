@@ -685,7 +685,25 @@ export function PropertyForm({ property }: PropertyFormProps) {
                   height={320}
                 /> */}
 
-                <LocationMap />
+                <LocationMap
+                  pins={
+                    form.watch("lat") != null &&
+                    form.watch("lng") != null &&
+                    !Number.isNaN(Number(form.watch("lat"))) &&
+                    !Number.isNaN(Number(form.watch("lng")))
+                      ? [
+                          {
+                            lat: Number(form.watch("lat")),
+                            lng: Number(form.watch("lng")),
+                          },
+                        ]
+                      : undefined
+                  }
+                  onPinDragEnd={(pin) => {
+                    form.setValue("lat", pin.lat);
+                    form.setValue("lng", pin.lng);
+                  }}
+                />
               </div>
               <FormField
                 control={form.control}
