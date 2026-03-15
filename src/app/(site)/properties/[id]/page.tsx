@@ -19,11 +19,7 @@ import {
   getRelatedProperties,
 } from "@/drizzle/queries/properties";
 import { getCdnImageUrl } from "@/lib/utils";
-
-const LocationMap = dynamic(
-  () => import("@/components/LocationMap").then((m) => ({ default: m.default })),
-  { ssr: false }
-);
+import LocationMap from "@/components/LocationMap";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -159,18 +155,19 @@ export default async function PropertyDetailsPage({ params }: Props) {
                 <h3 className="font-semibold mb-4">
                   Interested in this property?
                 </h3>
-                {property.brochureKey && getCdnImageUrl(property.brochureKey) && (
-                  <Button className="w-full mb-3" asChild>
-                    <Link
-                      href={getCdnImageUrl(property.brochureKey)!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <DownloadIcon className="h-4 w-4" />
-                      Download Brochure
-                    </Link>
-                  </Button>
-                )}
+                {property.brochureKey &&
+                  getCdnImageUrl(property.brochureKey) && (
+                    <Button className="w-full mb-3" asChild>
+                      <Link
+                        href={getCdnImageUrl(property.brochureKey)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <DownloadIcon className="h-4 w-4" />
+                        Download Brochure
+                      </Link>
+                    </Button>
+                  )}
 
                 <Button variant="outline" className="w-full" asChild>
                   <Link href="/contact">Ask a Question</Link>
@@ -192,7 +189,12 @@ export default async function PropertyDetailsPage({ params }: Props) {
                       ]}
                       height={280}
                     />
-                    <Button variant="outline" size="sm" className="w-full" asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      asChild
+                    >
                       <Link
                         href={`https://www.google.com/maps?q=${Number(property.lat)},${Number(property.lng)}`}
                         target="_blank"
