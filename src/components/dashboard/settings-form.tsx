@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2Icon, PlusIcon, Trash2Icon, LinkIcon, MailIcon, MessageCircleIcon, ImageIcon, UploadIcon } from "lucide-react";
 import { SETTING_KEYS, type HomeSliderSlide } from "@/lib/settings-keys";
 import { getCdnImageUrl } from "@/lib/utils";
+import { SearchLocationInput } from "@/components/SearchLocationInput";
 
 const LocationMap = dynamic(
   () =>
@@ -290,20 +291,32 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
               <div className="space-y-2">
                 <Label>Address</Label>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Click on the map to set the office location. Enter the full address below.
+                  Search for a place or drag the map pin to set the office location. Enter or edit the full address below.
                 </p>
+                <SearchLocationInput
+                  value={get(SETTING_KEYS.address)}
+                  placeholder="Search for a place or address..."
+                  disabled={saving}
+                  onSelect={(details) => {
+                    set(SETTING_KEYS.address_lat, String(details.lat));
+                    set(SETTING_KEYS.address_lng, String(details.lng));
+                    set(SETTING_KEYS.address, details.formattedAddress);
+                  }}
+                />
                 <LocationMap
-                  points={
+                  pins={
                     get(SETTING_KEYS.address_lat) && get(SETTING_KEYS.address_lng)
-                      ? {
-                          lat: Number.parseFloat(get(SETTING_KEYS.address_lat)),
-                          lng: Number.parseFloat(get(SETTING_KEYS.address_lng)),
-                        }
+                      ? [
+                          {
+                            lat: Number.parseFloat(get(SETTING_KEYS.address_lat)),
+                            lng: Number.parseFloat(get(SETTING_KEYS.address_lng)),
+                          },
+                        ]
                       : undefined
                   }
-                  onLocationChange={(lat, lng) => {
-                    set(SETTING_KEYS.address_lat, String(lat));
-                    set(SETTING_KEYS.address_lng, String(lng));
+                  onPinDragEnd={(pin) => {
+                    set(SETTING_KEYS.address_lat, String(pin.lat));
+                    set(SETTING_KEYS.address_lng, String(pin.lng));
                   }}
                   height={320}
                 />

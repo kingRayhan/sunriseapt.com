@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -12,14 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import {
   ArrowLeftIcon,
   Loader2Icon,
@@ -192,12 +189,11 @@ export function BlogForm({ post }: BlogFormProps) {
     "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
-    <Form {...form}>
-      <form
-        id="blog-form"
-        onSubmit={onSubmit}
-        className="flex min-h-[calc(100vh-var(--header-height,5rem))] flex-col"
-      >
+    <form
+      id="blog-form"
+      onSubmit={onSubmit}
+      className="flex min-h-[calc(100vh-var(--header-height,5rem))] flex-col"
+    >
         <div className="flex-1 space-y-8 pb-24">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -232,86 +228,87 @@ export function BlogForm({ post }: BlogFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
+                <Controller
                   name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={saving}
-                          onBlur={() => syncSlugFromTitle()}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="blog-form-title">Title *</FieldLabel>
+                      <Input
+                        id="blog-form-title"
+                        {...field}
+                        disabled={saving}
+                        onBlur={() => syncSlugFromTitle()}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
-                <FormField
-                  control={form.control}
+                <Controller
                   name="slug"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Slug *</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled={saving} />
-                      </FormControl>
-                      <FormDescription>
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="blog-form-slug">Slug *</FieldLabel>
+                      <Input
+                        id="blog-form-slug"
+                        {...field}
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <FieldDescription>
                         URL path (e.g. my-first-post)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
+                      </FieldDescription>
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
+              <Controller
                 name="excerpt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Excerpt</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={saving}
-                        placeholder="Short summary"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="blog-form-excerpt">Excerpt</FieldLabel>
+                    <Input
+                      id="blog-form-excerpt"
+                      {...field}
+                      disabled={saving}
+                      placeholder="Short summary"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
                 )}
               />
-              <FormField
-                control={form.control}
+              <Controller
                 name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Content</FormLabel>
-                    <FormControl>
-                      <RichTextEditor
-                        value={field.value ?? ""}
-                        onChange={field.onChange}
-                        placeholder="Write your post content…"
-                        disabled={saving}
-                        minHeight="280px"
-                      />
-                    </FormControl>
-                    <FormDescription>
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Content</FieldLabel>
+                    <RichTextEditor
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      placeholder="Write your post content…"
+                      disabled={saving}
+                      minHeight="280px"
+                    />
+                    <FieldDescription>
                       Use the toolbar for bold, italic, headings, lists, and
                       more.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
+                    </FieldDescription>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
                 )}
               />
-              <FormField
-                control={form.control}
+              <Controller
                 name="imageKey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Feature image</FormLabel>
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Feature image</FieldLabel>
                     <div className="space-y-2">
                       {field.value ? (
                         <div className="relative inline-block">
@@ -381,45 +378,48 @@ export function BlogForm({ post }: BlogFormProps) {
                         </p>
                       )}
                     </div>
-                    <FormMessage />
-                  </FormItem>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
                 )}
               />
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
+                <Controller
                   name="date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date *</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="date" disabled={saving} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="blog-form-date">Date *</FieldLabel>
+                      <Input
+                        id="blog-form-date"
+                        {...field}
+                        type="date"
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
+              <Controller
                 name="published"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Published</FormLabel>
-                    <FormControl>
-                      <div className="flex h-10 items-center pt-2">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={saving}
-                        />
-                        <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Show on blog
-                        </label>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Published</FieldLabel>
+                    <div className="flex h-10 items-center pt-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Show on blog
+                      </label>
+                    </div>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
                 )}
               />
             </CardContent>
@@ -458,7 +458,6 @@ export function BlogForm({ post }: BlogFormProps) {
             </Button>
           </div>
         </div>
-      </form>
-    </Form>
+    </form>
   );
 }

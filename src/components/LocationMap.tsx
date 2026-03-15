@@ -3,8 +3,9 @@
 import { cn } from "@/lib/utils";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import dynamic from "next/dynamic";
 import React, { useEffect } from "react";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import { useMap } from "react-leaflet";
 
 const DEFAULT_CENTER: [number, number] = [
   23.876081553480855, 90.38725243439256,
@@ -31,6 +32,21 @@ export interface LocationMapProps {
   className?: string;
 }
 
+const MapContainerComponent = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+
+const TileLayerComponent = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
+
+const MarkerComponent = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false },
+);
+
 const LocationMap: React.FC<LocationMapProps> = ({
   pins,
   className,
@@ -47,21 +63,21 @@ const LocationMap: React.FC<LocationMapProps> = ({
       className={cn("w-full rounded-md relative overflow-hidden", className)}
       style={{ minHeight: height }}
     >
-      <MapContainer
+      <MapContainerComponent
         center={center}
         zoom={13}
         className="h-full w-full"
         style={{ height: "100%", minHeight: height }}
         scrollWheelZoom={false}
       >
-        <TileLayer
+        <TileLayerComponent
           attribution="&copy; Google Maps"
           url="https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
         />
         {pins?.length > 0 && <MapCenterToPins pins={pins} />}
         {pins?.length > 0 &&
           pins?.map((pin, index) => (
-            <Marker
+            <MarkerComponent
               key={`${pin.lat}-${pin.lng}-${index}`}
               position={[pin.lat, pin.lng]}
               draggable={onPinDragEnd ? true : false}
@@ -84,7 +100,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
               })}
             />
           ))}
-      </MapContainer>
+      </MapContainerComponent>
     </div>
   );
 };

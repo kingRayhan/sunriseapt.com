@@ -5,14 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,7 +38,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import LocationMap from "../LocationMap";
 import { SearchLocationInput } from "../SearchLocationInput";
@@ -323,12 +320,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
     "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
-    <Form {...form}>
-      <form
-        id="property-form"
-        onSubmit={onSubmit}
-        className="flex min-h-[calc(100vh-var(--header-height,5rem))] flex-col"
-      >
+    <form
+      id="property-form"
+      onSubmit={onSubmit}
+      className="flex min-h-[calc(100vh-var(--header-height,5rem))] flex-col"
+    >
         <div className="flex-1 space-y-8 pb-24">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -361,70 +357,67 @@ export function PropertyForm({ property }: PropertyFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
+                <Controller
                   name="title"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Title *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          onBlur={() => {
-                            field.onBlur();
-                            syncSlugFromTitle();
-                          }}
-                          disabled={saving}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-title">Title *</FieldLabel>
+                      <Input
+                        id="property-form-title"
+                        {...field}
+                        onBlur={() => {
+                          field.onBlur();
+                          syncSlugFromTitle();
+                        }}
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
-                <FormField
-                  control={form.control}
+                <Controller
                   name="slug"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Slug *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={saving}
-                          placeholder="url-friendly-name"
-                          aria-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      <FormDescription>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-slug">Slug *</FieldLabel>
+                      <Input
+                        id="property-form-slug"
+                        {...field}
+                        disabled={saving}
+                        placeholder="url-friendly-name"
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <FieldDescription>
                         URL-friendly identifier. Auto-generated from title if
                         left blank.
-                      </FormDescription>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                      </FieldDescription>
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
+              <Controller
                 name="description"
+                control={form.control}
                 render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <textarea
-                        {...field}
-                        disabled={saving}
-                        rows={4}
-                        className={inputClassName}
-                        aria-invalid={fieldState.invalid}
-                      />
-                    </FormControl>
-                    <FormDescription>
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-description">Description</FieldLabel>
+                    <textarea
+                      id="property-form-description"
+                      {...field}
+                      disabled={saving}
+                      rows={4}
+                      className={inputClassName}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldDescription>
                       Full property description for the listing page.
-                    </FormDescription>
-                    {fieldState.invalid && <FormMessage />}
-                  </FormItem>
+                    </FieldDescription>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
                 )}
               />
             </CardContent>
@@ -440,23 +433,21 @@ export function PropertyForm({ property }: PropertyFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <FormField
-                  control={form.control}
+                <Controller
                   name="type"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Type</FormLabel>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-type">Type</FieldLabel>
                       <Select
                         name={field.name}
                         onValueChange={field.onChange}
                         value={field.value}
                         disabled={saving}
                       >
-                        <FormControl>
-                          <SelectTrigger aria-invalid={fieldState.invalid}>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <SelectTrigger id="property-form-type" aria-invalid={fieldState.invalid}>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="apartment">Apartment</SelectItem>
                           <SelectItem value="villa">Villa</SelectItem>
@@ -465,27 +456,25 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           <SelectItem value="land">Land</SelectItem>
                         </SelectContent>
                       </Select>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
-                <FormField
-                  control={form.control}
+                <Controller
                   name="status"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-status">Status</FieldLabel>
                       <Select
                         name={field.name}
                         onValueChange={field.onChange}
                         value={field.value}
                         disabled={saving}
                       >
-                        <FormControl>
-                          <SelectTrigger aria-invalid={fieldState.invalid}>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <SelectTrigger id="property-form-status" aria-invalid={fieldState.invalid}>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="available">Available</SelectItem>
                           <SelectItem value="sold">Sold</SelectItem>
@@ -493,50 +482,47 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           <SelectItem value="draft">Draft</SelectItem>
                         </SelectContent>
                       </Select>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
-                <FormField
-                  control={form.control}
+                <Controller
                   name="price"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Price</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          inputMode="decimal"
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-price">Price</FieldLabel>
+                      <Input
+                        id="property-form-price"
+                        {...field}
+                        type="text"
+                        inputMode="decimal"
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="featured"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>Featured</FieldLabel>
+                      <div className="flex h-10 items-center pt-2">
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                           disabled={saving}
                           aria-invalid={fieldState.invalid}
                         />
-                      </FormControl>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="featured"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Featured</FormLabel>
-                      <FormControl>
-                        <div className="flex h-10 items-center pt-2">
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={saving}
-                            aria-invalid={fieldState.invalid}
-                          />
-                          <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            Show on homepage
-                          </label>
-                        </div>
-                      </FormControl>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                        <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Show on homepage
+                        </label>
+                      </div>
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
               </div>
@@ -553,94 +539,90 @@ export function PropertyForm({ property }: PropertyFormProps) {
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <FormField
-                  control={form.control}
+                <Controller
                   name="bedrooms"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Bedrooms</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          disabled={saving}
-                          value={field.value}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? parseInt(e.target.value, 10) : 0,
-                            )
-                          }
-                          onBlur={field.onBlur}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-bedrooms">Bedrooms</FieldLabel>
+                      <Input
+                        id="property-form-bedrooms"
+                        type="number"
+                        min={0}
+                        disabled={saving}
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? parseInt(e.target.value, 10) : 0,
+                          )
+                        }
+                        onBlur={field.onBlur}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
-                <FormField
-                  control={form.control}
+                <Controller
                   name="bathrooms"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Bathrooms</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          disabled={saving}
-                          value={field.value}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? parseInt(e.target.value, 10) : 0,
-                            )
-                          }
-                          onBlur={field.onBlur}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-bathrooms">Bathrooms</FieldLabel>
+                      <Input
+                        id="property-form-bathrooms"
+                        type="number"
+                        min={0}
+                        disabled={saving}
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? parseInt(e.target.value, 10) : 0,
+                          )
+                        }
+                        onBlur={field.onBlur}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
-                <FormField
-                  control={form.control}
+                <Controller
                   name="area"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Area (sqft)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          inputMode="decimal"
-                          disabled={saving}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-area">Area (sqft)</FieldLabel>
+                      <Input
+                        id="property-form-area"
+                        {...field}
+                        type="text"
+                        inputMode="decimal"
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
-                <FormField
-                  control={form.control}
+                <Controller
                   name="yearBuilt"
+                  control={form.control}
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Year Built</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          min={1800}
-                          max={2100}
-                          disabled={saving}
-                          placeholder="e.g. 2024"
-                          aria-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      {fieldState.invalid && <FormMessage />}
-                    </FormItem>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="property-form-yearBuilt">Year Built</FieldLabel>
+                      <Input
+                        id="property-form-yearBuilt"
+                        {...field}
+                        type="number"
+                        min={1800}
+                        max={2100}
+                        disabled={saving}
+                        placeholder="e.g. 2024"
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
                   )}
                 />
               </div>
@@ -693,22 +675,21 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 />
               </div>
 
-              <FormField
-                control={form.control}
+              <Controller
                 name="address"
+                control={form.control}
                 render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={saving}
-                        placeholder="Full address (from search)"
-                        aria-invalid={fieldState.invalid}
-                      />
-                    </FormControl>
-                    {fieldState.invalid && <FormMessage />}
-                  </FormItem>
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-address">Address</FieldLabel>
+                    <Input
+                      id="property-form-address"
+                      {...field}
+                      disabled={saving}
+                      placeholder="Full address (from search)"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
                 )}
               />
             </CardContent>
@@ -780,22 +761,21 @@ export function PropertyForm({ property }: PropertyFormProps) {
                   )}
                 </div>
               </div>
-              <FormField
-                control={form.control}
+              <Controller
                 name="featuresStr"
+                control={form.control}
                 render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel>Features</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={saving}
-                        placeholder="Parking, Gym, Pool (comma-separated)"
-                        aria-invalid={fieldState.invalid}
-                      />
-                    </FormControl>
-                    {fieldState.invalid && <FormMessage />}
-                  </FormItem>
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-featuresStr">Features</FieldLabel>
+                    <Input
+                      id="property-form-featuresStr"
+                      {...field}
+                      disabled={saving}
+                      placeholder="Parking, Gym, Pool (comma-separated)"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
                 )}
               />
               <div className="space-y-2">
@@ -884,24 +864,23 @@ export function PropertyForm({ property }: PropertyFormProps) {
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
                 {PROJECT_DETAIL_FIELDS.map(({ key, label }) => (
-                  <FormField
+                  <Controller
                     key={key}
-                    control={form.control}
                     name={key}
+                    control={form.control}
                     render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormLabel>{label}</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value ?? ""}
-                            disabled={saving}
-                            placeholder={label}
-                            aria-invalid={fieldState.invalid}
-                          />
-                        </FormControl>
-                        {fieldState.invalid && <FormMessage />}
-                      </FormItem>
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={`property-form-${key}`}>{label}</FieldLabel>
+                        <Input
+                          id={`property-form-${key}`}
+                          {...field}
+                          value={field.value ?? ""}
+                          disabled={saving}
+                          placeholder={label}
+                          aria-invalid={fieldState.invalid}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
                     )}
                   />
                 ))}
@@ -937,7 +916,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
             </Button>
           </div>
         </div>
-      </form>
-    </Form>
+    </form>
   );
 }

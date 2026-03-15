@@ -13,12 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyImageGallery from "@/components/PropertyImageGallery";
-import { LocationMapClient } from "@/components/LocationMapClient";
+import dynamic from "next/dynamic";
 import {
   getPropertyBySlug,
   getRelatedProperties,
 } from "@/drizzle/queries/properties";
 import { getCdnImageUrl } from "@/lib/utils";
+
+const LocationMap = dynamic(
+  () => import("@/components/LocationMap").then((m) => ({ default: m.default })),
+  { ssr: false }
+);
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -178,9 +183,14 @@ export default async function PropertyDetailsPage({ params }: Props) {
                 !Number.isNaN(Number(property.lng)) && (
                   <div className="space-y-2">
                     <h3 className="font-semibold">Location</h3>
-                    <LocationMapClient
-                      points={{ lat: Number(property.lat), lng: Number(property.lng) }}
-                      location={property.title}
+                    <LocationMap
+                      pins={[
+                        {
+                          lat: Number(property.lat),
+                          lng: Number(property.lng),
+                        },
+                      ]}
+                      height={280}
                     />
                     <Button variant="outline" size="sm" className="w-full" asChild>
                       <Link

@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
  * Returns a 401 NextResponse if not signed in, otherwise null.
  */
 export async function requireAuth(): Promise<NextResponse | null> {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
