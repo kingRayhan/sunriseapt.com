@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 
 const PLACES_AUTOCOMPLETE_URL =
   "https://places.googleapis.com/v1/places:autocomplete";
@@ -21,6 +22,8 @@ export interface PlaceSearchSuggestion {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   const apiKey = getApiKey();
   if (!apiKey) {
     return NextResponse.json(

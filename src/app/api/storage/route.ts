@@ -1,11 +1,14 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 import { getBucket, getS3Client } from "@/lib/s3";
 
 const SIGNED_URL_EXPIRES_IN = 3600; // 1 hour
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   try {
     const body = await request.json();
     const {

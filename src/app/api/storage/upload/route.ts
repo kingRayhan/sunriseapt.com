@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 import { uploadS3Object } from "@/lib/s3";
 
 function getExtension(fileName: string, mimeType: string): string {
@@ -23,6 +24,8 @@ function generateKey(prefix: string, fileName: string, mimeType: string): string
  * - prefix "brochures": PDFs (and optionally other docs). Returns { key } for brochure.
  */
 export async function POST(request: Request) {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   try {
     const formData = await request.formData();
     const file = formData.get("file");

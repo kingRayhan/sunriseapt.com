@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 import { createGalleryImage } from "@/drizzle/queries/gallery";
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   try {
     const body = await request.json();
     const { imageKey, altText, sortOrder } = body as {

@@ -52,6 +52,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
         zoom={13}
         className="h-full w-full"
         style={{ height: "100%", minHeight: height }}
+        scrollWheelZoom={false}
       >
         <TileLayer
           attribution="&copy; Google Maps"

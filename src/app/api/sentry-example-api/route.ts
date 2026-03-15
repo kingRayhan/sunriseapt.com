@@ -1,4 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
+import { requireAuth } from "@/lib/require-auth";
+
 export const dynamic = "force-dynamic";
 
 class SentryExampleAPIError extends Error {
@@ -9,7 +11,9 @@ class SentryExampleAPIError extends Error {
 }
 
 // A faulty API route to test Sentry's error monitoring
-export function GET() {
+export async function GET() {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   Sentry.logger.info("Sentry example API called");
   throw new SentryExampleAPIError(
     "This error is raised on the backend called by the example page.",

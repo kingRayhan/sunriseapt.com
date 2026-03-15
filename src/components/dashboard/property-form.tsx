@@ -152,13 +152,21 @@ interface PropertyFormProps {
 export function PropertyForm({ property }: PropertyFormProps) {
   const router = useRouter();
   const isEdit = !!property;
-  const { uploadFiles, loading: storageLoading, error: storageError } = useStorage();
+  const {
+    uploadFiles,
+    loading: storageLoading,
+    error: storageError,
+  } = useStorage();
 
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertyFormSchema),
     defaultValues: getDefaultValues(property),
-    mode: "onTouched",
+    mode: "onSubmit",
   });
+
+  const {
+    formState: { errors },
+  } = form;
 
   const saveMutation = useMutation({
     mutationFn: async (values: PropertyFormValues) => {
@@ -226,7 +234,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
     },
   });
 
-  const onSubmit = form.handleSubmit((values) => saveMutation.mutate(values));
+  const onSubmit = form.handleSubmit(
+    (values) => saveMutation.mutate(values),
+    (err) => {
+      const firstError = Object.keys(err)[0];
+      if (firstError) {
+        document
+          .querySelector(`[name="${firstError}"]`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    },
+  );
 
   function syncSlugFromTitle() {
     const title = form.getValues("title");
@@ -240,14 +258,22 @@ export function PropertyForm({ property }: PropertyFormProps) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type !== "application/pdf") {
-      toast({ title: "Error", description: "Please select a PDF file.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Please select a PDF file.",
+        variant: "destructive",
+      });
       return;
     }
     try {
       const [result] = await uploadFiles([file], "brochures");
       form.setValue("brochureKey", result.key);
     } catch {
-      toast({ title: "Upload failed", description: storageError?.message ?? "Failed to upload brochure.", variant: "destructive" });
+      toast({
+        title: "Upload failed",
+        description: storageError?.message ?? "Failed to upload brochure.",
+        variant: "destructive",
+      });
     }
     e.target.value = "";
   }
@@ -255,7 +281,9 @@ export function PropertyForm({ property }: PropertyFormProps) {
   async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files?.length) return;
-    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    const imageFiles = Array.from(files).filter((f) =>
+      f.type.startsWith("image/"),
+    );
     if (!imageFiles.length) return;
     try {
       const results = await uploadFiles(imageFiles, "gallery");
@@ -267,7 +295,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
         .filter(Boolean);
       form.setValue("imagesStr", [...existing, ...keys].join(", "));
     } catch {
-      toast({ title: "Upload failed", description: storageError?.message ?? "Failed to upload images.", variant: "destructive" });
+      toast({
+        title: "Upload failed",
+        description: storageError?.message ?? "Failed to upload images.",
+        variant: "destructive",
+      });
     }
     e.target.value = "";
   }
@@ -332,7 +364,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 <FormField
                   control={form.control}
                   name="title"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Title *</FormLabel>
                       <FormControl>
@@ -343,16 +375,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
                             syncSlugFromTitle();
                           }}
                           disabled={saving}
+                          aria-invalid={fieldState.invalid}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="slug"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Slug *</FormLabel>
                       <FormControl>
@@ -360,13 +393,14 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           {...field}
                           disabled={saving}
                           placeholder="url-friendly-name"
+                          aria-invalid={fieldState.invalid}
                         />
                       </FormControl>
                       <FormDescription>
                         URL-friendly identifier. Auto-generated from title if
                         left blank.
                       </FormDescription>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
@@ -374,7 +408,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
               <FormField
                 control={form.control}
                 name="description"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
@@ -383,12 +417,13 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         disabled={saving}
                         rows={4}
                         className={inputClassName}
+                        aria-invalid={fieldState.invalid}
                       />
                     </FormControl>
                     <FormDescription>
                       Full property description for the listing page.
                     </FormDescription>
-                    <FormMessage />
+                    {fieldState.invalid && <FormMessage />}
                   </FormItem>
                 )}
               />
@@ -408,7 +443,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 <FormField
                   control={form.control}
                   name="type"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Type</FormLabel>
                       <Select
@@ -418,7 +453,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         disabled={saving}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger aria-invalid={fieldState.invalid}>
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -430,14 +465,14 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           <SelectItem value="land">Land</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="status"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
                       <Select
@@ -447,7 +482,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         disabled={saving}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger aria-invalid={fieldState.invalid}>
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
@@ -458,14 +493,14 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           <SelectItem value="draft">Draft</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="price"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Price</FormLabel>
                       <FormControl>
@@ -474,16 +509,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           type="text"
                           inputMode="decimal"
                           disabled={saving}
+                          aria-invalid={fieldState.invalid}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="featured"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Featured</FormLabel>
                       <FormControl>
@@ -492,13 +528,14 @@ export function PropertyForm({ property }: PropertyFormProps) {
                             checked={field.value}
                             onCheckedChange={field.onChange}
                             disabled={saving}
+                            aria-invalid={fieldState.invalid}
                           />
                           <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                             Show on homepage
                           </label>
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
@@ -519,7 +556,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 <FormField
                   control={form.control}
                   name="bedrooms"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Bedrooms</FormLabel>
                       <FormControl>
@@ -534,16 +571,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
                             )
                           }
                           onBlur={field.onBlur}
+                          aria-invalid={fieldState.invalid}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="bathrooms"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Bathrooms</FormLabel>
                       <FormControl>
@@ -558,16 +596,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
                             )
                           }
                           onBlur={field.onBlur}
+                          aria-invalid={fieldState.invalid}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="area"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Area (sqft)</FormLabel>
                       <FormControl>
@@ -576,16 +615,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           type="text"
                           inputMode="decimal"
                           disabled={saving}
+                          aria-invalid={fieldState.invalid}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="yearBuilt"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel>Year Built</FormLabel>
                       <FormControl>
@@ -596,9 +636,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
                           max={2100}
                           disabled={saving}
                           placeholder="e.g. 2024"
+                          aria-invalid={fieldState.invalid}
                         />
                       </FormControl>
-                      <FormMessage />
+                      {fieldState.invalid && <FormMessage />}
                     </FormItem>
                   )}
                 />
@@ -655,7 +696,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
               <FormField
                 control={form.control}
                 name="address"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>Address</FormLabel>
                     <FormControl>
@@ -663,9 +704,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         {...field}
                         disabled={saving}
                         placeholder="Full address (from search)"
+                        aria-invalid={fieldState.invalid}
                       />
                     </FormControl>
-                    <FormMessage />
+                    {fieldState.invalid && <FormMessage />}
                   </FormItem>
                 )}
               />
@@ -730,23 +772,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       No images. Upload or paste keys below.
                     </p>
                   )}
-                  {/* <FormField
-                  control={form.control}
-                  name="imagesStr"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={saving}
-                          placeholder="gallery/1.jpg, gallery/2.jpg (or paste comma-separated keys)"
-                          className="font-mono text-sm"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
+
                   {storageError && (
                     <p className="text-sm text-destructive">
                       {storageError.message}
@@ -757,7 +783,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
               <FormField
                 control={form.control}
                 name="featuresStr"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel>Features</FormLabel>
                     <FormControl>
@@ -765,9 +791,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         {...field}
                         disabled={saving}
                         placeholder="Parking, Gym, Pool (comma-separated)"
+                        aria-invalid={fieldState.invalid}
                       />
                     </FormControl>
-                    <FormMessage />
+                    {fieldState.invalid && <FormMessage />}
                   </FormItem>
                 )}
               />
@@ -861,7 +888,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     key={key}
                     control={form.control}
                     name={key}
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <FormLabel>{label}</FormLabel>
                         <FormControl>
@@ -870,9 +897,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
                             value={field.value ?? ""}
                             disabled={saving}
                             placeholder={label}
+                            aria-invalid={fieldState.invalid}
                           />
                         </FormControl>
-                        <FormMessage />
+                        {fieldState.invalid && <FormMessage />}
                       </FormItem>
                     )}
                   />

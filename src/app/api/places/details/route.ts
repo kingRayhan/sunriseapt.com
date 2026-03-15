@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 
 function getApiKey(): string {
   return (
@@ -21,6 +22,8 @@ export interface PlaceDetailsResult {
 }
 
 export async function GET(request: Request) {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   const apiKey = getApiKey();
   if (!apiKey) {
     return NextResponse.json(

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 import { getSiteSettings, upsertSiteSetting } from "@/drizzle/queries/settings";
 
 export async function GET() {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   try {
     const settings = await getSiteSettings();
     return NextResponse.json(settings);
@@ -13,6 +16,8 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   try {
     const body = (await request.json()) as Record<string, unknown>;
     if (!body || typeof body !== "object") {

@@ -35,12 +35,11 @@ const useFormField = () => {
   const itemContext = React.useContext(FormItemContext);
   const { getFieldState, formState } = useFormContext();
 
-  const fieldState = getFieldState(fieldContext.name, formState);
-
-  if (!fieldContext) {
+  if (!fieldContext?.name) {
     throw new Error("useFormField should be used within <FormField>");
   }
 
+  const fieldState = getFieldState(fieldContext.name, formState);
   const { id } = itemContext;
 
   return {
@@ -59,13 +58,28 @@ type FormItemContextValue = {
 
 const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
 
+const FormItemInner = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => {
+    const { error } = useFormField();
+    return (
+      <div
+        ref={ref}
+        className={cn("space-y-2", className)}
+        data-invalid={!!error}
+        {...props}
+      />
+    );
+  },
+);
+FormItemInner.displayName = "FormItemInner";
+
 const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
     const id = React.useId();
 
     return (
       <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn("space-y-2", className)} {...props} />
+        <FormItemInner ref={ref} className={className} {...props} />
       </FormItemContext.Provider>
     );
   },

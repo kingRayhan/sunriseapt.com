@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 import { getAllProperties, createProperty } from "@/drizzle/queries/properties";
 import type { NewProperty } from "@/drizzle/schema";
 import type { ProjectDetail } from "@/drizzle/schema";
@@ -126,6 +127,8 @@ function parseBody(body: unknown): Partial<NewProperty> & { title: string } {
 }
 
 export async function GET() {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   try {
     const properties = await getAllProperties();
     return NextResponse.json(properties);
@@ -137,6 +140,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAuth();
+  if (unauthorized) return unauthorized;
   try {
     const body = await request.json();
     const data = parseBody(body) as NewProperty;
