@@ -44,6 +44,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import LocationMap from "../LocationMap";
+import { SearchLocationInput } from "../SearchLocationInput";
 
 function slugify(s: string): string {
   return s
@@ -665,26 +666,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
+              <SearchLocationInput
+                value={form.watch("address") ?? ""}
+                placeholder="Search for a place or address..."
+                disabled={saving}
+                onSelect={(details) => {
+                  form.setValue("lat", details.lat);
+                  form.setValue("lng", details.lng);
+                  form.setValue("address", details.formattedAddress);
+                }}
+              />
               <div>
-                {/* <LocationMap
-                  points={
-                    form.watch("lat") != null &&
-                    form.watch("lng") != null &&
-                    !Number.isNaN(Number(form.watch("lat"))) &&
-                    !Number.isNaN(Number(form.watch("lng")))
-                      ? {
-                          lat: Number(form.watch("lat")),
-                          lng: Number(form.watch("lng")),
-                        }
-                      : undefined
-                  }
-                  onLocationChange={(lat, lng) => {
-                    form.setValue("lat", lat);
-                    form.setValue("lng", lng);
-                  }}
-                  height={320}
-                /> */}
-
                 <LocationMap
                   pins={
                     form.watch("lat") != null &&
@@ -705,23 +697,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                   }}
                 />
               </div>
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={saving}
-                        placeholder="e.g. Uttara, Dhaka (from search)"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name="address"

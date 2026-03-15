@@ -3,8 +3,23 @@
 import { cn } from "@/lib/utils";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import React from "react";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import React, { useEffect } from "react";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+
+const DEFAULT_CENTER: [number, number] = [
+  23.876081553480855, 90.38725243439256,
+];
+
+function MapCenterToPins({ pins }: { pins: { lat: number; lng: number }[] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (pins?.length > 0) {
+      const [pin] = pins;
+      map.setView([pin.lat, pin.lng], map.getZoom());
+    }
+  }, [map, pins]);
+  return null;
+}
 
 export interface LocationMapProps {
   pins?: {
@@ -22,13 +37,18 @@ const LocationMap: React.FC<LocationMapProps> = ({
   height = 400,
   onPinDragEnd,
 }) => {
+  const center =
+    pins?.length > 0
+      ? ([pins[0].lat, pins[0].lng] as [number, number])
+      : DEFAULT_CENTER;
+
   return (
     <div
       className={cn("w-full rounded-md relative overflow-hidden", className)}
       style={{ minHeight: height }}
     >
       <MapContainer
-        center={[23.876081553480855, 90.38725243439256]}
+        center={center}
         zoom={13}
         className="h-full w-full"
         style={{ height: "100%", minHeight: height }}
@@ -37,11 +57,11 @@ const LocationMap: React.FC<LocationMapProps> = ({
           attribution="&copy; Google Maps"
           url="https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
         />
-
+        {pins?.length > 0 && <MapCenterToPins pins={pins} />}
         {pins?.length > 0 &&
           pins?.map((pin, index) => (
             <Marker
-              key={index}
+              key={`${pin.lat}-${pin.lng}-${index}`}
               position={[pin.lat, pin.lng]}
               draggable={onPinDragEnd ? true : false}
               eventHandlers={
