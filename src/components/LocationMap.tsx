@@ -1,72 +1,43 @@
 "use client";
 
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
+import { cn } from "@/lib/utils";
 import "leaflet/dist/leaflet.css";
-
-const DEFAULT_ZOOM = 15;
-
-function getGoogleMapsTileUrl(): string {
-  const key =
-    typeof process !== "undefined"
-      ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ??
-        process.env.NEXT_PUBLIC_GOOGLE_MAP_KEY ??
-        ""
-      : "";
-  const keyParam = key ? `&key=${key}` : "";
-  return `https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}${keyParam}`;
-}
+import React from "react";
+import { MapContainer, TileLayer } from "react-leaflet";
 
 export interface LocationMapProps {
-  /** Single point to show on the map (lat, lng). */
-  points: { lat: number; lng: number };
-  /** Optional label for the marker popup. */
-  location?: string | null;
+  pins?: {
+    lat: number;
+    lng: number;
+  }[];
+  onPinClick?: (pin: { lat: number; lng: number }) => void;
+  height?: number;
   className?: string;
 }
 
-export function LocationMap({
-  points,
-  location,
-  className = "",
-}: LocationMapProps) {
-  const position: [number, number] = [points.lat, points.lng];
-
-  useEffect(() => {
-    const DefaultIcon = L.Icon.Default;
-    if (DefaultIcon) {
-      DefaultIcon.mergeOptions({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl:
-          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl:
-          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      });
-    }
-  }, []);
-
+const LocationMap: React.FC<LocationMapProps> = ({
+  pins,
+  className,
+  height = 400,
+}) => {
   return (
     <div
-      className={`relative z-0 w-full rounded-lg border border-border overflow-hidden bg-muted ${className}`}
-      style={{ height: 250 }}
+      className={cn("w-full rounded-md overflow-hidden", className)}
+      style={{ minHeight: height }}
     >
       <MapContainer
-        center={position}
-        zoom={DEFAULT_ZOOM}
-        style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom
+        center={[23.876081553480855, 90.38725243439256]}
+        zoom={13}
+        className="h-full w-full"
+        style={{ height: "100%", minHeight: height }}
       >
         <TileLayer
-          attribution="© Google"
-          url={getGoogleMapsTileUrl()}
-          subdomains="0123"
-          maxZoom={20}
+          attribution="&copy; Google Maps"
+          url="https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
         />
-        <Marker position={position}>
-          {location && <Popup>{location}</Popup>}
-        </Marker>
       </MapContainer>
     </div>
   );
-}
+};
+
+export default LocationMap;

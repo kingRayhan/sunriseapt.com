@@ -1,17 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { GalleryImagePreview } from "@/components/dashboard/gallery-image-preview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -22,6 +13,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -29,28 +22,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Loader2Icon,
-  ArrowLeftIcon,
-  MapPinIcon,
-  FileImageIcon,
-  LayoutGridIcon,
-  UploadIcon,
-  FileTextIcon,
-  X,
-} from "lucide-react";
 import type { Property } from "@/drizzle";
 import type { ProjectDetail } from "@/drizzle/schema";
-import { GalleryImagePreview } from "@/components/dashboard/gallery-image-preview";
+import { toast } from "@/hooks/use-toast";
 import { getCdnImageUrl } from "@/lib/utils";
-
-const LocationMap = dynamic(
-  () =>
-    import("@/components/dashboard/location-map").then((m) => ({
-      default: m.LocationMap,
-    })),
-  { ssr: false },
-);
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import {
+  ArrowLeftIcon,
+  FileImageIcon,
+  FileTextIcon,
+  LayoutGridIcon,
+  Loader2Icon,
+  MapPinIcon,
+  UploadIcon,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import LocationMap from "../LocationMap";
 
 function slugify(s: string): string {
   return s
@@ -233,7 +226,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
       return res.json();
     },
     onSuccess: () => {
-      router.push("/dashboard/properties");
+      toast({
+        title: "Property saved successfully",
+        description: "Your property has been saved successfully",
+      });
       router.refresh();
     },
   });
@@ -664,24 +660,32 @@ export function PropertyForm({ property }: PropertyFormProps) {
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Search for a place or click on the map to set the property pin.
-                Location and address are filled from search.
+                Click on the map to set the pin. Enter location and address
+                below.
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <LocationMap
-                  lat={form.watch("lat")}
-                  lng={form.watch("lng")}
+                {/* <LocationMap
+                  points={
+                    form.watch("lat") != null &&
+                    form.watch("lng") != null &&
+                    !Number.isNaN(Number(form.watch("lat"))) &&
+                    !Number.isNaN(Number(form.watch("lng")))
+                      ? {
+                          lat: Number(form.watch("lat")),
+                          lng: Number(form.watch("lng")),
+                        }
+                      : undefined
+                  }
                   onLocationChange={(lat, lng) => {
                     form.setValue("lat", lat);
                     form.setValue("lng", lng);
                   }}
-                  onSearchResult={({ location, address }) => {
-                    form.setValue("location", location);
-                    form.setValue("address", address);
-                  }}
-                  disabled={saving}
-                />
+                  height={320}
+                /> */}
+
+                <LocationMap />
               </div>
               <FormField
                 control={form.control}

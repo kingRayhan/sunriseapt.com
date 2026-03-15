@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   Bed,
@@ -14,25 +13,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyImageGallery from "@/components/PropertyImageGallery";
+import { LocationMapClient } from "@/components/LocationMapClient";
 import {
   getPropertyBySlug,
   getRelatedProperties,
 } from "@/drizzle/queries/properties";
-import { formatPrice, getCdnImageUrl } from "@/lib/utils";
-
-const LocationMap = dynamic(
-  () => import("@/components/LocationMap").then((m) => ({ default: m.LocationMap })),
-  { ssr: false },
-);
+import { getCdnImageUrl } from "@/lib/utils";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const revalidate = 60;
 
 export default async function PropertyDetailsPage({ params }: Props) {
-  const property = await getPropertyBySlug(params.id);
+  const { id } = await params;
+  const property = await getPropertyBySlug(id);
 
   if (!property) notFound();
 
@@ -182,7 +178,7 @@ export default async function PropertyDetailsPage({ params }: Props) {
                 !Number.isNaN(Number(property.lng)) && (
                   <div className="space-y-2">
                     <h3 className="font-semibold">Location</h3>
-                    <LocationMap
+                    <LocationMapClient
                       points={{ lat: Number(property.lat), lng: Number(property.lng) }}
                       location={property.title}
                     />

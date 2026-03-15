@@ -47,10 +47,11 @@ function parseBody(body: unknown): Partial<Omit<NewBlogPost, "id" | "createdAt">
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const post = await getPostById(params.id);
+    const { id } = await params;
+    const post = await getPostById(id);
     if (!post)
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     return NextResponse.json(post);
@@ -63,15 +64,16 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const post = await getPostById(params.id);
+    const { id } = await params;
+    const post = await getPostById(id);
     if (!post)
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     const body = await request.json();
     const data = parseBody(body);
-    const updated = await updatePost(params.id, data);
+    const updated = await updatePost(id, data);
     return NextResponse.json(updated);
   } catch (err) {
     const message =
@@ -82,13 +84,14 @@ export async function PATCH(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const post = await getPostById(params.id);
+    const { id } = await params;
+    const post = await getPostById(id);
     if (!post)
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    await deletePost(params.id);
+    await deletePost(id);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message =

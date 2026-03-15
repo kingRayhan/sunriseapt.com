@@ -18,7 +18,7 @@ export default function PropertyFilters({ properties }: PropertyFiltersProps) {
   const [sortBy, setSortBy] = useState<string>("price-asc");
 
   const filtered = useMemo(() => {
-    let result = properties.filter((p) => {
+    const result = properties.filter((p) => {
       if (typeFilter !== "all" && p.type !== typeFilter) return false;
       if (bedroomFilter !== "all" && p.bedrooms !== parseInt(bedroomFilter)) return false;
       if (locationFilter && !p.location?.toLowerCase().includes(locationFilter.toLowerCase())) return false;

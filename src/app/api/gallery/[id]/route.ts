@@ -7,10 +7,10 @@ import { deleteS3Object } from "@/lib/s3";
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const image = await getGalleryImageById(id);
     if (!image) {
       return NextResponse.json({ error: "Gallery image not found" }, { status: 404 });

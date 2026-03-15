@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { submitContactInquiry } from "@/drizzle/queries/contact";
 
 const LocationMap = dynamic(
-  () => import("@/components/LocationMap").then((m) => ({ default: m.LocationMap })),
+  () => import("@/components/LocationMap").then((m) => ({ default: m.default })),
   { ssr: false },
 );
 

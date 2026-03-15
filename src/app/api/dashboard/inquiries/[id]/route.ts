@@ -15,10 +15,11 @@ function parseBody(body: unknown): { status?: string } {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const inquiry = await getInquiryById(params.id);
+    const { id } = await params;
+    const inquiry = await getInquiryById(id);
     if (!inquiry)
       return NextResponse.json({ error: "Inquiry not found" }, { status: 404 });
     return NextResponse.json(inquiry);
@@ -31,17 +32,18 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const inquiry = await getInquiryById(params.id);
+    const { id } = await params;
+    const inquiry = await getInquiryById(id);
     if (!inquiry)
       return NextResponse.json({ error: "Inquiry not found" }, { status: 404 });
     const body = await request.json();
     const data = parseBody(body);
     if (Object.keys(data).length === 0)
       return NextResponse.json(inquiry);
-    const updated = await updateInquiry(params.id, data);
+    const updated = await updateInquiry(id, data);
     return NextResponse.json(updated);
   } catch (err) {
     const message =
@@ -52,13 +54,14 @@ export async function PATCH(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const inquiry = await getInquiryById(params.id);
+    const { id } = await params;
+    const inquiry = await getInquiryById(id);
     if (!inquiry)
       return NextResponse.json({ error: "Inquiry not found" }, { status: 404 });
-    await deleteInquiry(params.id);
+    await deleteInquiry(id);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message =

@@ -6,7 +6,7 @@ import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LocationMap = dynamic(
-  () => import("@/components/LocationMap").then((m) => ({ default: m.LocationMap })),
+  () => import("@/components/LocationMap").then((m) => ({ default: m.default })),
   { ssr: false },
 );
 

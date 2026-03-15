@@ -109,10 +109,11 @@ function parseBody(body: unknown): Partial<NewProperty> {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const property = await getPropertyById(params.id);
+    const { id } = await params;
+    const property = await getPropertyById(id);
     if (!property)
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     return NextResponse.json(property);
@@ -125,15 +126,16 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const property = await getPropertyById(params.id);
+    const { id } = await params;
+    const property = await getPropertyById(id);
     if (!property)
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     const body = await request.json();
     const data = parseBody(body);
-    const updated = await updateProperty(params.id, data);
+    const updated = await updateProperty(id, data);
     return NextResponse.json(updated);
   } catch (err) {
     const message =
@@ -144,13 +146,14 @@ export async function PATCH(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const property = await getPropertyById(params.id);
+    const { id } = await params;
+    const property = await getPropertyById(id);
     if (!property)
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
-    await deleteProperty(params.id);
+    await deleteProperty(id);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message =

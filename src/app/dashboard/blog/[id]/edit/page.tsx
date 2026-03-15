@@ -3,11 +3,12 @@ import { getPostById } from "@/drizzle/queries/blog";
 import { BlogForm } from "@/components/dashboard/blog-form";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditBlogPage({ params }: Props) {
-  const post = await getPostById(params.id);
+  const { id } = await params;
+  const post = await getPostById(id);
   if (!post) notFound();
 
   return (

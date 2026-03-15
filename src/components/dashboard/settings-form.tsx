@@ -14,8 +14,8 @@ import { getCdnImageUrl } from "@/lib/utils";
 
 const LocationMap = dynamic(
   () =>
-    import("@/components/dashboard/location-map").then((m) => ({
-      default: m.LocationMap,
+    import("@/components/LocationMap").then((m) => ({
+      default: m.default,
     })),
   { ssr: false },
 );
@@ -290,25 +290,22 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
               <div className="space-y-2">
                 <Label>Address</Label>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Search for a place or click on the map to set the office location. The address field is filled from search.
+                  Click on the map to set the office location. Enter the full address below.
                 </p>
                 <LocationMap
-                  lat={
-                    get(SETTING_KEYS.address_lat)
-                      ? Number.parseFloat(get(SETTING_KEYS.address_lat))
-                      : undefined
-                  }
-                  lng={
-                    get(SETTING_KEYS.address_lng)
-                      ? Number.parseFloat(get(SETTING_KEYS.address_lng))
+                  points={
+                    get(SETTING_KEYS.address_lat) && get(SETTING_KEYS.address_lng)
+                      ? {
+                          lat: Number.parseFloat(get(SETTING_KEYS.address_lat)),
+                          lng: Number.parseFloat(get(SETTING_KEYS.address_lng)),
+                        }
                       : undefined
                   }
                   onLocationChange={(lat, lng) => {
                     set(SETTING_KEYS.address_lat, String(lat));
                     set(SETTING_KEYS.address_lng, String(lng));
                   }}
-                  onSearchResult={({ address }) => set(SETTING_KEYS.address, address)}
-                  disabled={saving}
+                  height={320}
                 />
                 <div className="pt-2">
                   <Label htmlFor={SETTING_KEYS.address}>Full address</Label>
@@ -509,7 +506,6 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
                       {slide.imageKey && getCdnImageUrl(slide.imageKey) ? (
                         <div className="flex flex-col gap-2">
                           <div className="relative w-full max-w-xs aspect-video rounded-md border overflow-hidden bg-muted">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={getCdnImageUrl(slide.imageKey)!}
                               alt={slide.title ?? `Slide ${index + 1}`}

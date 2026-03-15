@@ -1,18 +1,19 @@
-import { notFound } from "next/navigation";
 import { getPropertyById } from "@/drizzle/queries/properties";
-import { PropertyForm } from "@/components/dashboard/property-form";
+import { notFound } from "next/navigation";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditPropertyPage({ params }: Props) {
-  const property = await getPropertyById(params.id);
+  const { id } = await params;
+  const property = await getPropertyById(id);
   if (!property) notFound();
 
   return (
     <div className="space-y-6">
-      <PropertyForm property={property} />
+      <pre>{JSON.stringify(property, null, 2)}</pre>
+      {/* <PropertyForm property={property} /> */}
     </div>
   );
 }

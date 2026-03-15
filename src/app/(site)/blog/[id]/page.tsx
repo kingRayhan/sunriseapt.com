@@ -6,13 +6,14 @@ import { getPostBySlug } from "@/drizzle/queries/blog";
 import { getCdnImageUrl } from "@/lib/utils";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const revalidate = 60;
 
 export default async function BlogPostPage({ params }: Props) {
-  const post = await getPostBySlug(params.id);
+  const { id } = await params;
+  const post = await getPostBySlug(id);
 
   if (!post) {
     return (
