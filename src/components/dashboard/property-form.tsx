@@ -25,6 +25,7 @@ import {
 import type { Property } from "@/drizzle";
 import type { ProjectDetail } from "@/drizzle/schema";
 import { toast } from "@/hooks/use-toast";
+import { useStorage } from "@/hooks/use-storage";
 import { getCdnImageUrl } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -40,7 +41,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import LocationMap from "../LocationMap";
@@ -66,7 +66,6 @@ const propertyFormSchema = z.object({
   bathrooms: z.coerce.number().min(0).optional(),
   area: z.string().optional(),
   yearBuilt: z.string().optional(),
-  location: z.string().optional(),
   address: z.string().optional(),
   lat: z.number().optional(),
   lng: z.number().optional(),
@@ -74,6 +73,7 @@ const propertyFormSchema = z.object({
   imagesStr: z.string().optional(),
   featuresStr: z.string().optional(),
   brochureKey: z.string().optional(),
+
   // Fixed project detail fields
   projectName: z.string().optional(),
   orientation: z.string().optional(),
@@ -112,7 +112,6 @@ function getDefaultValues(property?: Property | null): PropertyFormValues {
     bathrooms: property?.bathrooms ?? 0,
     area: property?.area ?? "0",
     yearBuilt: property?.yearBuilt != null ? String(property.yearBuilt) : "",
-    location: property?.location ?? "",
     address: property?.address ?? "",
     lat: property?.lat ?? undefined,
     lng: property?.lng ?? undefined,
@@ -153,14 +152,7 @@ interface PropertyFormProps {
 export function PropertyForm({ property }: PropertyFormProps) {
   const router = useRouter();
   const isEdit = !!property;
-  const [brochureUploading, setBrochureUploading] = useState(false);
-  const [brochureUploadError, setBrochureUploadError] = useState<string | null>(
-    null,
-  );
-  const [imagesUploading, setImagesUploading] = useState(false);
-  const [imagesUploadError, setImagesUploadError] = useState<string | null>(
-    null,
-  );
+  const { uploadFiles, loading: storageLoading, error: storageError } = useStorage();
 
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertyFormSchema),
@@ -189,7 +181,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
         yearBuilt: values.yearBuilt?.trim()
           ? parseInt(values.yearBuilt, 10)
           : undefined,
-        location: values.location?.trim() || null,
         address: values.address?.trim() || null,
         lat:
           values.lat != null && !Number.isNaN(values.lat)
@@ -249,73 +240,36 @@ export function PropertyForm({ property }: PropertyFormProps) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type !== "application/pdf") {
-      setBrochureUploadError("Please select a PDF file.");
+      toast({ title: "Error", description: "Please select a PDF file.", variant: "destructive" });
       return;
     }
-    setBrochureUploadError(null);
-    setBrochureUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("prefix", "brochures");
-      const res = await fetch("/api/storage/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? "Upload failed");
-      }
-      const { key } = await res.json();
-      form.setValue("brochureKey", key);
-    } catch (err) {
-      setBrochureUploadError(
-        err instanceof Error ? err.message : "Upload failed",
-      );
-    } finally {
-      setBrochureUploading(false);
-      e.target.value = "";
+      const [result] = await uploadFiles([file], "brochures");
+      form.setValue("brochureKey", result.key);
+    } catch {
+      toast({ title: "Upload failed", description: storageError?.message ?? "Failed to upload brochure.", variant: "destructive" });
     }
+    e.target.value = "";
   }
 
   async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files?.length) return;
-    setImagesUploadError(null);
-    setImagesUploading(true);
-    const keys: string[] = [];
+    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (!imageFiles.length) return;
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith("image/")) continue;
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("prefix", "gallery");
-        const res = await fetch("/api/storage/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (!res.ok) {
-          const d = await res.json();
-          throw new Error(d.error ?? "Upload failed");
-        }
-        const { key } = await res.json();
-        keys.push(key);
-      }
+      const results = await uploadFiles(imageFiles, "gallery");
+      const keys = results.map((r) => r.key);
       const current = form.getValues("imagesStr") ?? "";
       const existing = current
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
       form.setValue("imagesStr", [...existing, ...keys].join(", "));
-    } catch (err) {
-      setImagesUploadError(
-        err instanceof Error ? err.message : "Upload failed",
-      );
-    } finally {
-      setImagesUploading(false);
-      e.target.value = "";
+    } catch {
+      toast({ title: "Upload failed", description: storageError?.message ?? "Failed to upload images.", variant: "destructive" });
     }
+    e.target.value = "";
   }
 
   const imagesStr = form.watch("imagesStr") ?? "";
@@ -739,7 +693,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       accept="image/*"
                       multiple
                       onChange={handleGalleryUpload}
-                      disabled={saving || imagesUploading}
+                      disabled={saving || storageLoading}
                       className="hidden"
                       id="gallery-upload"
                     />
@@ -747,12 +701,12 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={saving || imagesUploading}
+                      disabled={saving || storageLoading}
                       onClick={() =>
                         document.getElementById("gallery-upload")?.click()
                       }
                     >
-                      {imagesUploading ? (
+                      {storageLoading ? (
                         <>
                           <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                           Uploading…
@@ -793,9 +747,9 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     </FormItem>
                   )}
                 /> */}
-                  {imagesUploadError && (
+                  {storageError && (
                     <p className="text-sm text-destructive">
-                      {imagesUploadError}
+                      {storageError.message}
                     </p>
                   )}
                 </div>
@@ -825,7 +779,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       type="file"
                       accept=".pdf,application/pdf"
                       onChange={handleBrochureUpload}
-                      disabled={saving || brochureUploading}
+                      disabled={saving || storageLoading}
                       className="hidden"
                       id="brochure-upload"
                     />
@@ -833,12 +787,12 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={saving || brochureUploading}
+                      disabled={saving || storageLoading}
                       onClick={() =>
                         document.getElementById("brochure-upload")?.click()
                       }
                     >
-                      {brochureUploading ? (
+                      {storageLoading ? (
                         <>
                           <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                           Uploading…
@@ -879,9 +833,9 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       No brochure. Upload a PDF or leave empty.
                     </p>
                   )}
-                  {brochureUploadError && (
+                  {storageError && (
                     <p className="text-sm text-destructive">
-                      {brochureUploadError}
+                      {storageError.message}
                     </p>
                   )}
                 </div>
