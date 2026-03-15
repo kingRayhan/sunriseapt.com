@@ -6,7 +6,8 @@ import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LocationMap = dynamic(
-  () => import("@/components/LocationMap").then((m) => ({ default: m.default })),
+  () =>
+    import("@/components/LocationMap").then((m) => ({ default: m.default })),
   { ssr: false },
 );
 
@@ -45,14 +46,12 @@ export function HomeMapSection({
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-3">
             Our Location
           </h2>
-          <p className="text-muted-foreground">
-            Find us on the map
-          </p>
+          <p className="text-muted-foreground">Find us on the map</p>
         </div>
         <div className="rounded-lg overflow-hidden shadow-lg border border-border">
           <LocationMap
-            points={{ lat: mapLocation.lat, lng: mapLocation.lng }}
-            location={mapLocation.address}
+            pins={[{ lat: mapLocation.lat, lng: mapLocation.lng }]}
+            height={300}
           />
           <div className="p-3 bg-muted/50 border-t flex flex-wrap items-center justify-center gap-2">
             {mapLocation.address && (

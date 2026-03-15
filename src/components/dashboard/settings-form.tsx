@@ -109,13 +109,14 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
   }, [settings]);
 
   // Home slider state (local copy for editing)
+  const homeSliderValue = settings[SETTING_KEYS.home_slider] ?? "";
   const [sliderSlides, setSliderSlides] = useState<HomeSliderSlide[]>(() =>
-    parseHomeSlider(get(SETTING_KEYS.home_slider))
+    parseHomeSlider(homeSliderValue)
   );
 
   useEffect(() => {
-    setSliderSlides(parseHomeSlider(get(SETTING_KEYS.home_slider)));
-  }, [settings[SETTING_KEYS.home_slider]]);
+    setSliderSlides(parseHomeSlider(homeSliderValue));
+  }, [homeSliderValue]);
 
   const updateSlide = (index: number, field: keyof HomeSliderSlide, value: string) => {
     setSliderSlides((prev) => {

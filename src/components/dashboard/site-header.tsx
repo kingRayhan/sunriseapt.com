@@ -13,7 +13,6 @@ export function SiteHeader() {
         />
         <h1 className="text-base font-medium flex-1">Dashboard</h1>
         <UserButton
-          afterSignOutUrl="/"
           appearance={{
             elements: {
               avatarBox: "h-8 w-8",

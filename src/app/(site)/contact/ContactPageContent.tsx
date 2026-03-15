@@ -14,7 +14,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { submitContactInquiry } from "@/drizzle/queries/contact";
 
 const LocationMap = dynamic(
-  () => import("@/components/LocationMap").then((m) => ({ default: m.default })),
+  () =>
+    import("@/components/LocationMap").then((m) => ({ default: m.default })),
   { ssr: false },
 );
 
@@ -222,8 +223,8 @@ export function ContactPageContent({
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-3">Our Location</h3>
                 <LocationMap
-                  points={{ lat: mapLocation.lat, lng: mapLocation.lng }}
-                  location={mapLocation.address}
+                  pins={[{ lat: mapLocation.lat, lng: mapLocation.lng }]}
+                  height={280}
                 />
                 {mapLocation.address && (
                   <a
