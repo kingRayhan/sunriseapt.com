@@ -19,7 +19,7 @@ import {
   getRelatedProperties,
 } from "@/drizzle/queries/properties";
 import { getCdnImageUrl } from "@/lib/utils";
-import LocationMap from "@/components/LocationMap";
+import MapClient from "./MapClient";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -180,14 +180,13 @@ export default async function PropertyDetailsPage({ params }: Props) {
                 !Number.isNaN(Number(property.lng)) && (
                   <div className="space-y-2">
                     <h3 className="font-semibold">Location</h3>
-                    <LocationMap
+                    <MapClient
                       pins={[
                         {
                           lat: Number(property.lat),
                           lng: Number(property.lng),
                         },
                       ]}
-                      height={280}
                     />
                     <Button
                       variant="outline"
