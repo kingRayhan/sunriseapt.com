@@ -6,6 +6,7 @@ import { getFeaturedProperties } from "@/drizzle/queries/properties";
 import { getSiteSettings } from "@/drizzle/queries/settings";
 import { SETTING_KEYS } from "@/lib/settings-keys";
 import HeroCarousel from "@/components/HeroCarousel";
+import HeroVideoSection from "@/components/HeroVideoSection";
 import { getCdnImageUrl } from "@/lib/utils";
 import type { HomeSliderSlide } from "@/lib/settings-keys";
 import { ArrowRight } from "lucide-react";
@@ -45,7 +46,13 @@ function getHeroSlides(settings: Record<string, string>): HeroSlide[] {
   const result: HeroSlide[] = [];
   for (const s of slides) {
     const image = getCdnImageUrl(s.imageKey);
-    if (image) result.push({ image, title: s.title, subtitle: s.subtitle, link: s.link });
+    if (image)
+      result.push({
+        image,
+        title: s.title,
+        subtitle: s.subtitle,
+        link: s.link,
+      });
   }
   return result;
 }
@@ -58,6 +65,10 @@ export default async function HomePage() {
   ]);
   const mapLocation = getMapLocation(settings);
   const heroSlides = getHeroSlides(settings);
+
+  const heroVideoUrl = process.env.NEXT_PUBLIC_HERO_VIDEO_URL?.trim() || null;
+  const heroVideoPoster =
+    process.env.NEXT_PUBLIC_HERO_VIDEO_POSTER_URL?.trim() || null;
 
   return (
     <>
@@ -130,6 +141,13 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <HeroVideoSection
+        videoSrc={heroVideoUrl}
+        posterSrc={heroVideoPoster}
+        title="See Our Story"
+        subtitle="Discover the places we create and the values that guide us."
+      />
 
       {/* Featured Properties */}
       <section className="py-16 lg:py-24">
