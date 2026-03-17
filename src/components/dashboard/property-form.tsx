@@ -263,7 +263,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
       return;
     }
     try {
-      const [result] = await uploadFiles([file], "brochures");
+      const MAX_PDF_SIZE_MB = 20;
+      const [result] = await uploadFiles([file], "brochures", {
+        maxFileSizeMb: MAX_PDF_SIZE_MB,
+      });
       form.setValue("brochureKey", result.key);
     } catch {
       toast({
@@ -325,597 +328,650 @@ export function PropertyForm({ property }: PropertyFormProps) {
       onSubmit={onSubmit}
       className="flex min-h-[calc(100vh-var(--header-height,5rem))] flex-col"
     >
-        <div className="flex-1 space-y-8 pb-24">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button type="button" variant="ghost" size="icon" asChild>
-                <Link href="/dashboard/properties">
-                  <ArrowLeftIcon className="h-4 w-4" />
-                </Link>
-              </Button>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {isEdit ? "Edit Property" : "New Property"}
-              </h1>
-            </div>
+      <div className="flex-1 space-y-8 pb-24">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button type="button" variant="ghost" size="icon" asChild>
+              <Link href="/dashboard/properties">
+                <ArrowLeftIcon className="h-4 w-4" />
+              </Link>
+            </Button>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {isEdit ? "Edit Property" : "New Property"}
+            </h1>
           </div>
+        </div>
 
-          {saveMutation.isError && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {saveMutation.error instanceof Error
-                ? saveMutation.error.message
-                : "Something went wrong"}
-            </div>
-          )}
+        {saveMutation.isError && (
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {saveMutation.error instanceof Error
+              ? saveMutation.error.message
+              : "Something went wrong"}
+          </div>
+        )}
 
-          {/* Basic info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <LayoutGridIcon className="h-5 w-5" />
-                Basic info
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Controller
-                  name="title"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-title">Title *</FieldLabel>
-                      <Input
-                        id="property-form-title"
-                        {...field}
-                        onBlur={() => {
-                          field.onBlur();
-                          syncSlugFromTitle();
-                        }}
-                        disabled={saving}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="slug"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-slug">Slug *</FieldLabel>
-                      <Input
-                        id="property-form-slug"
-                        {...field}
-                        disabled={saving}
-                        placeholder="url-friendly-name"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      <FieldDescription>
-                        URL-friendly identifier. Auto-generated from title if
-                        left blank.
-                      </FieldDescription>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-              </div>
+        {/* Basic info */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <LayoutGridIcon className="h-5 w-5" />
+              Basic info
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <Controller
-                name="description"
+                name="title"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="property-form-description">Description</FieldLabel>
-                    <textarea
-                      id="property-form-description"
+                    <FieldLabel htmlFor="property-form-title">
+                      Title *
+                    </FieldLabel>
+                    <Input
+                      id="property-form-title"
+                      {...field}
+                      onBlur={() => {
+                        field.onBlur();
+                        syncSlugFromTitle();
+                      }}
+                      disabled={saving}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="slug"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-slug">Slug *</FieldLabel>
+                    <Input
+                      id="property-form-slug"
                       {...field}
                       disabled={saving}
-                      rows={4}
-                      className={inputClassName}
+                      placeholder="url-friendly-name"
                       aria-invalid={fieldState.invalid}
                     />
                     <FieldDescription>
-                      Full property description for the listing page.
+                      URL-friendly identifier. Auto-generated from title if left
+                      blank.
                     </FieldDescription>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
-            </CardContent>
-          </Card>
+            </div>
+            <Controller
+              name="description"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="property-form-description">
+                    Description
+                  </FieldLabel>
+                  <textarea
+                    id="property-form-description"
+                    {...field}
+                    disabled={saving}
+                    rows={4}
+                    className={inputClassName}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldDescription>
+                    Full property description for the listing page.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </CardContent>
+        </Card>
 
-          {/* Listing */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Listing</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Type, status, price and visibility
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Controller
-                  name="type"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-type">Type</FieldLabel>
-                      <Select
-                        name={field.name}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={saving}
+        {/* Listing */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Listing</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Type, status, price and visibility
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Controller
+                name="type"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-type">Type</FieldLabel>
+                    <Select
+                      name={field.name}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={saving}
+                    >
+                      <SelectTrigger
+                        id="property-form-type"
+                        aria-invalid={fieldState.invalid}
                       >
-                        <SelectTrigger id="property-form-type" aria-invalid={fieldState.invalid}>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="apartment">Apartment</SelectItem>
-                          <SelectItem value="villa">Villa</SelectItem>
-                          <SelectItem value="penthouse">Penthouse</SelectItem>
-                          <SelectItem value="commercial">Commercial</SelectItem>
-                          <SelectItem value="land">Land</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="status"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-status">Status</FieldLabel>
-                      <Select
-                        name={field.name}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={saving}
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="apartment">Apartment</SelectItem>
+                        <SelectItem value="villa">Villa</SelectItem>
+                        <SelectItem value="penthouse">Penthouse</SelectItem>
+                        <SelectItem value="commercial">Commercial</SelectItem>
+                        <SelectItem value="land">Land</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="status"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-status">
+                      Status
+                    </FieldLabel>
+                    <Select
+                      name={field.name}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={saving}
+                    >
+                      <SelectTrigger
+                        id="property-form-status"
+                        aria-invalid={fieldState.invalid}
                       >
-                        <SelectTrigger id="property-form-status" aria-invalid={fieldState.invalid}>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="available">Available</SelectItem>
-                          <SelectItem value="sold">Sold</SelectItem>
-                          <SelectItem value="reserved">Reserved</SelectItem>
-                          <SelectItem value="draft">Draft</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="price"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-price">Price</FieldLabel>
-                      <Input
-                        id="property-form-price"
-                        {...field}
-                        type="text"
-                        inputMode="decimal"
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="sold">Sold</SelectItem>
+                        <SelectItem value="reserved">Reserved</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="price"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-price">Price</FieldLabel>
+                    <Input
+                      id="property-form-price"
+                      {...field}
+                      type="text"
+                      inputMode="decimal"
+                      disabled={saving}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="featured"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Featured</FieldLabel>
+                    <div className="flex h-10 items-center pt-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                         disabled={saving}
                         aria-invalid={fieldState.invalid}
                       />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="featured"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Featured</FieldLabel>
-                      <div className="flex h-10 items-center pt-2">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={saving}
-                          aria-invalid={fieldState.invalid}
-                        />
-                        <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Show on homepage
-                        </label>
-                      </div>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-              </div>
-            </CardContent>
-          </Card>
+                      <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Show on homepage
+                      </label>
+                    </div>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Specifications */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Specifications</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Beds, baths, area and year built
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Controller
-                  name="bedrooms"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-bedrooms">Bedrooms</FieldLabel>
-                      <Input
-                        id="property-form-bedrooms"
-                        type="number"
-                        min={0}
-                        disabled={saving}
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? parseInt(e.target.value, 10) : 0,
-                          )
-                        }
-                        onBlur={field.onBlur}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="bathrooms"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-bathrooms">Bathrooms</FieldLabel>
-                      <Input
-                        id="property-form-bathrooms"
-                        type="number"
-                        min={0}
-                        disabled={saving}
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? parseInt(e.target.value, 10) : 0,
-                          )
-                        }
-                        onBlur={field.onBlur}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="area"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-area">Area (sqft)</FieldLabel>
-                      <Input
-                        id="property-form-area"
-                        {...field}
-                        type="text"
-                        inputMode="decimal"
-                        disabled={saving}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="yearBuilt"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="property-form-yearBuilt">Year Built</FieldLabel>
-                      <Input
-                        id="property-form-yearBuilt"
-                        {...field}
-                        type="number"
-                        min={1800}
-                        max={2100}
-                        disabled={saving}
-                        placeholder="e.g. 2024"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Specifications */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Specifications</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Beds, baths, area and year built
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Controller
+                name="bedrooms"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-bedrooms">
+                      Bedrooms
+                    </FieldLabel>
+                    <Input
+                      id="property-form-bedrooms"
+                      type="number"
+                      min={0}
+                      disabled={saving}
+                      value={field.value}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseInt(e.target.value, 10) : 0,
+                        )
+                      }
+                      onBlur={field.onBlur}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="bathrooms"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-bathrooms">
+                      Bathrooms
+                    </FieldLabel>
+                    <Input
+                      id="property-form-bathrooms"
+                      type="number"
+                      min={0}
+                      disabled={saving}
+                      value={field.value}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseInt(e.target.value, 10) : 0,
+                        )
+                      }
+                      onBlur={field.onBlur}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="area"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-area">
+                      Area (sqft)
+                    </FieldLabel>
+                    <Input
+                      id="property-form-area"
+                      {...field}
+                      type="text"
+                      inputMode="decimal"
+                      disabled={saving}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="yearBuilt"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-yearBuilt">
+                      Year Built
+                    </FieldLabel>
+                    <Input
+                      id="property-form-yearBuilt"
+                      {...field}
+                      type="number"
+                      min={1800}
+                      max={2100}
+                      disabled={saving}
+                      placeholder="e.g. 2024"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Location */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MapPinIcon className="h-5 w-5" />
-                Location
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Search for a place or click on the map to set the property pin.
-                Click on the map to set the pin. Enter location and address
-                below.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <SearchLocationInput
-                value={form.watch("address") ?? ""}
-                placeholder="Search for a place or address..."
-                disabled={saving}
-                onSelect={(details) => {
-                  form.setValue("lat", details.lat);
-                  form.setValue("lng", details.lng);
-                  form.setValue("address", details.formattedAddress);
+        {/* Location */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <MapPinIcon className="h-5 w-5" />
+              Location
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Search for a place or click on the map to set the property pin.
+              Click on the map to set the pin. Enter location and address below.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <SearchLocationInput
+              value={form.watch("address") ?? ""}
+              placeholder="Search for a place or address..."
+              disabled={saving}
+              onSelect={(details) => {
+                form.setValue("lat", details.lat);
+                form.setValue("lng", details.lng);
+                form.setValue("address", details.formattedAddress);
+              }}
+            />
+            <div>
+              <LocationMap
+                pins={
+                  form.watch("lat") != null &&
+                  form.watch("lng") != null &&
+                  !Number.isNaN(Number(form.watch("lat"))) &&
+                  !Number.isNaN(Number(form.watch("lng")))
+                    ? [
+                        {
+                          lat: Number(form.watch("lat")),
+                          lng: Number(form.watch("lng")),
+                        },
+                      ]
+                    : undefined
+                }
+                onPinDragEnd={(pin) => {
+                  form.setValue("lat", pin.lat);
+                  form.setValue("lng", pin.lng);
                 }}
               />
-              <div>
-                <LocationMap
-                  pins={
-                    form.watch("lat") != null &&
-                    form.watch("lng") != null &&
-                    !Number.isNaN(Number(form.watch("lat"))) &&
-                    !Number.isNaN(Number(form.watch("lng")))
-                      ? [
-                          {
-                            lat: Number(form.watch("lat")),
-                            lng: Number(form.watch("lng")),
-                          },
-                        ]
-                      : undefined
-                  }
-                  onPinDragEnd={(pin) => {
-                    form.setValue("lat", pin.lat);
-                    form.setValue("lng", pin.lng);
-                  }}
-                />
-              </div>
+            </div>
 
-              <Controller
-                name="address"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="property-form-address">Address</FieldLabel>
-                    <Input
-                      id="property-form-address"
-                      {...field}
-                      disabled={saving}
-                      placeholder="Full address (from search)"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Media */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FileImageIcon className="h-5 w-5" />
-                Media
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Gallery images, features and brochure
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Gallery images</Label>
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleGalleryUpload}
-                      disabled={saving || storageLoading}
-                      className="hidden"
-                      id="gallery-upload"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={saving || storageLoading}
-                      onClick={() =>
-                        document.getElementById("gallery-upload")?.click()
-                      }
-                    >
-                      {storageLoading ? (
-                        <>
-                          <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                          Uploading…
-                        </>
-                      ) : (
-                        <>
-                          <UploadIcon className="mr-2 h-4 w-4" />
-                          Upload images
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  {imageKeysList.length > 0 ? (
-                    <GalleryImagePreview
-                      keys={imageKeysList}
-                      onRemove={removeImageKey}
-                      disabled={saving}
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No images. Upload or paste keys below.
-                    </p>
-                  )}
-
-                  {storageError && (
-                    <p className="text-sm text-destructive">
-                      {storageError.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <Controller
-                name="featuresStr"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="property-form-featuresStr">Features</FieldLabel>
-                    <Input
-                      id="property-form-featuresStr"
-                      {...field}
-                      disabled={saving}
-                      placeholder="Parking, Gym, Pool (comma-separated)"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-              <div className="space-y-2">
-                <Label>Brochure (PDF)</Label>
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      type="file"
-                      accept=".pdf,application/pdf"
-                      onChange={handleBrochureUpload}
-                      disabled={saving || storageLoading}
-                      className="hidden"
-                      id="brochure-upload"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={saving || storageLoading}
-                      onClick={() =>
-                        document.getElementById("brochure-upload")?.click()
-                      }
-                    >
-                      {storageLoading ? (
-                        <>
-                          <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                          Uploading…
-                        </>
-                      ) : (
-                        <>
-                          <UploadIcon className="mr-2 h-4 w-4" />
-                          Upload PDF
-                        </>
-                      )}
-                    </Button>
-                    {form.watch("brochureKey") && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={saving}
-                        onClick={() => form.setValue("brochureKey", "")}
-                        className="text-muted-foreground"
-                        aria-label="Clear brochure"
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        Clear
-                      </Button>
-                    )}
-                  </div>
-                  {form.watch("brochureKey") ? (
-                    <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                      <FileTextIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <span className="truncate font-mono text-muted-foreground hover:underline">
-                        <a href={getCdnImageUrl(form.watch("brochureKey"))}>
-                          {form.watch("brochureKey")}
-                        </a>
-                      </span>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No brochure. Upload a PDF or leave empty.
-                    </p>
-                  )}
-                  {storageError && (
-                    <p className="text-sm text-destructive">
-                      {storageError.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Project details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <LayoutGridIcon className="h-5 w-5" />
-                Project details
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Fixed fields for project name, orientation, sizes and developer
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {PROJECT_DETAIL_FIELDS.map(({ key, label }) => (
-                  <Controller
-                    key={key}
-                    name={key}
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={`property-form-${key}`}>{label}</FieldLabel>
-                        <Input
-                          id={`property-form-${key}`}
-                          {...field}
-                          value={field.value ?? ""}
-                          disabled={saving}
-                          placeholder={label}
-                          aria-invalid={fieldState.invalid}
-                        />
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                      </Field>
-                    )}
+            <Controller
+              name="address"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="property-form-address">
+                    Address
+                  </FieldLabel>
+                  <Input
+                    id="property-form-address"
+                    {...field}
+                    disabled={saving}
+                    placeholder="Full address (from search)"
+                    aria-invalid={fieldState.invalid}
                   />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 py-4 backdrop-blur supports-backdrop-filter:bg-background/80">
-          <div className="container flex flex-wrap items-center justify-end gap-4 px-4 md:px-8">
-            <Button type="button" variant="outline" asChild>
-              <Link href="/dashboard/properties">Cancel</Link>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => form.reset(getDefaultValues(property))}
-              disabled={saving}
-            >
-              Reset
-            </Button>
-            <Button type="submit" form="property-form" disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                  Saving…
-                </>
-              ) : isEdit ? (
-                "Update Property"
-              ) : (
-                "Create Property"
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
-            </Button>
-          </div>
+            />
+          </CardContent>
+        </Card>
+
+        {/* Media */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FileImageIcon className="h-5 w-5" />
+              Media
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Gallery images, features and brochure
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Gallery images</Label>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleGalleryUpload}
+                    disabled={saving || storageLoading}
+                    className="hidden"
+                    id="gallery-upload"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={saving || storageLoading}
+                    onClick={() =>
+                      document.getElementById("gallery-upload")?.click()
+                    }
+                  >
+                    {storageLoading ? (
+                      <>
+                        <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading…
+                      </>
+                    ) : (
+                      <>
+                        <UploadIcon className="mr-2 h-4 w-4" />
+                        Upload images
+                      </>
+                    )}
+                  </Button>
+                </div>
+                {imageKeysList.length > 0 ? (
+                  <GalleryImagePreview
+                    keys={imageKeysList}
+                    onRemove={removeImageKey}
+                    disabled={saving}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No images. Upload or paste keys below.
+                  </p>
+                )}
+
+                {storageError && (
+                  <p className="text-sm text-destructive">
+                    {storageError.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <Controller
+              name="featuresStr"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="property-form-featuresStr">
+                    Features
+                  </FieldLabel>
+                  <Input
+                    id="property-form-featuresStr"
+                    {...field}
+                    disabled={saving}
+                    placeholder="Parking, Gym, Pool (comma-separated)"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <div className="space-y-2">
+              <Label>Brochure (PDF)</Label>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={handleBrochureUpload}
+                    disabled={saving || storageLoading}
+                    className="hidden"
+                    id="brochure-upload"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={saving || storageLoading}
+                    onClick={() =>
+                      document.getElementById("brochure-upload")?.click()
+                    }
+                  >
+                    {storageLoading ? (
+                      <>
+                        <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading…
+                      </>
+                    ) : (
+                      <>
+                        <UploadIcon className="mr-2 h-4 w-4" />
+                        Upload PDF
+                      </>
+                    )}
+                  </Button>
+                  {form.watch("brochureKey") && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={saving}
+                      onClick={() => form.setValue("brochureKey", "")}
+                      className="text-muted-foreground"
+                      aria-label="Clear brochure"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Clear
+                    </Button>
+                  )}
+                </div>
+                {form.watch("brochureKey") ? (
+                  <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+                    <FileTextIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate font-mono text-muted-foreground hover:underline">
+                      <a href={getCdnImageUrl(form.watch("brochureKey"))}>
+                        {form.watch("brochureKey")}
+                      </a>
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No brochure. Upload a PDF or leave empty.
+                  </p>
+                )}
+                {storageError && (
+                  <p className="text-sm text-destructive">
+                    {storageError.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Project details */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <LayoutGridIcon className="h-5 w-5" />
+              Project details
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Fixed fields for project name, orientation, sizes and developer
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {PROJECT_DETAIL_FIELDS.map(({ key, label }) => (
+                <Controller
+                  key={key}
+                  name={key}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={`property-form-${key}`}>
+                        {label}
+                      </FieldLabel>
+                      <Input
+                        id={`property-form-${key}`}
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={saving}
+                        placeholder={label}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 py-4 backdrop-blur supports-backdrop-filter:bg-background/80">
+        <div className="container flex flex-wrap items-center justify-end gap-4 px-4 md:px-8">
+          <Button type="button" variant="outline" asChild>
+            <Link href="/dashboard/properties">Cancel</Link>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => form.reset(getDefaultValues(property))}
+            disabled={saving}
+          >
+            Reset
+          </Button>
+          <Button type="submit" form="property-form" disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                Saving…
+              </>
+            ) : isEdit ? (
+              "Update Property"
+            ) : (
+              "Create Property"
+            )}
+          </Button>
         </div>
+      </div>
     </form>
   );
 }

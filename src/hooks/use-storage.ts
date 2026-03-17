@@ -6,6 +6,13 @@ export interface UploadResult {
   key: string;
 }
 
+const DEFAULT_MAX_FILE_SIZE_MB = 50;
+
+export interface UploadOptions {
+  /** Override max file size in megabytes for this call. Defaults to DEFAULT_MAX_FILE_SIZE_MB. */
+  maxFileSizeMb?: number;
+}
+
 function getExtension(file: File): string {
   const fromName = file.name.split(".").pop()?.toLowerCase();
   if (fromName) return fromName;
@@ -63,7 +70,11 @@ async function uploadOne(file: File, prefix: string): Promise<UploadResult> {
 
 export interface UseStorageReturn {
   /** Upload multiple files. Returns array of { key } in same order as input files. */
-  uploadFiles: (files: File[], directory?: string) => Promise<UploadResult[]>;
+  uploadFiles: (
+    files: File[],
+    directory?: string,
+    options?: UploadOptions,
+  ) => Promise<UploadResult[]>;
   loading: boolean;
   error: Error | null;
 }
@@ -91,7 +102,18 @@ export function useStorage(): UseStorageReturn {
   const uploadFiles = async (
     files: File[],
     directory: string = "gallery",
+    options?: UploadOptions,
   ): Promise<UploadResult[]> => {
+    const maxMb = options?.maxFileSizeMb ?? DEFAULT_MAX_FILE_SIZE_MB;
+    const maxBytes = maxMb * 1024 * 1024;
+
+    const oversize = files.find((file) => file.size > maxBytes);
+    if (oversize) {
+      throw new Error(
+        `File "${oversize.name}" is too large. Maximum size is ${maxMb}MB.`,
+      );
+    }
+
     return mutation.mutateAsync({
       files: Array.from(files),
       directory,
