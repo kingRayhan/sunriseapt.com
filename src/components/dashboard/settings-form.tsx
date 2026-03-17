@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2Icon, PlusIcon, Trash2Icon, LinkIcon, MailIcon, MessageCircleIcon, ImageIcon, UploadIcon } from "lucide-react";
 import { SETTING_KEYS, type HomeSliderSlide } from "@/lib/settings-keys";
 import { getCdnImageUrl } from "@/lib/utils";
+import { useStorage } from "@/hooks/use-storage";
 import { SearchLocationInput } from "@/components/SearchLocationInput";
 
 const LocationMap = dynamic(
@@ -113,6 +114,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
   const [sliderSlides, setSliderSlides] = useState<HomeSliderSlide[]>(() =>
     parseHomeSlider(homeSliderValue)
   );
+  const { uploadFiles, loading: storageLoading, error: storageError } = useStorage();
 
   useEffect(() => {
     setSliderSlides(parseHomeSlider(homeSliderValue));
@@ -158,19 +160,8 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
     const index = sliderUploadIndexRef.current;
     setSliderUploadError(null);
     try {
-      const formData = new FormData();
-      formData.set("file", file);
-      formData.set("prefix", "hero");
-      const res = await fetch("/api/storage/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? "Upload failed");
-      }
-      const { key } = await res.json();
-      updateSlide(index, "imageKey", key);
+      const [result] = await uploadFiles([file], "hero");
+      updateSlide(index, "imageKey", result.key);
     } catch (err) {
       setSliderUploadError(err instanceof Error ? err.message : "Upload failed");
     } finally {

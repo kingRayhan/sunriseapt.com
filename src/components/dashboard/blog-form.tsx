@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { getCdnImageUrl } from "@/lib/utils";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
+import { useStorage } from "@/hooks/use-storage";
 import type { BlogPost } from "@/drizzle";
 
 function slugify(s: string): string {
@@ -90,6 +91,7 @@ interface BlogFormProps {
 export function BlogForm({ post }: BlogFormProps) {
   const router = useRouter();
   const isEdit = !!post;
+  const { uploadFiles, loading: storageLoading, error: storageError } = useStorage();
 
   const form = useForm<BlogFormValues>({
     resolver: zodResolver(blogFormSchema),
@@ -159,19 +161,8 @@ export function BlogForm({ post }: BlogFormProps) {
     setImageUploadError(null);
     setImageUploading(true);
     try {
-      const formData = new FormData();
-      formData.set("file", file);
-      formData.set("prefix", "blog");
-      const res = await fetch("/api/storage/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? "Upload failed");
-      }
-      const { key } = await res.json();
-      form.setValue("imageKey", key);
+      const [result] = await uploadFiles([file], "blog");
+      form.setValue("imageKey", result.key);
     } catch (err) {
       setImageUploadError(err instanceof Error ? err.message : "Upload failed");
     } finally {

@@ -69,25 +69,29 @@ function parseBody(body: unknown): Partial<NewProperty> {
     out.address =
       typeof o.address === "string" ? o.address.trim() || null : null;
   if (o?.lat !== undefined && o?.lat !== "")
-    out.lat =
-      typeof o.lat === "number" ? o.lat : parseFloat(String(o.lat));
+    out.lat = typeof o.lat === "number" ? o.lat : parseFloat(String(o.lat));
   if (o?.lng !== undefined && o?.lng !== "")
-    out.lng =
-      typeof o.lng === "number" ? o.lng : parseFloat(String(o.lng));
+    out.lng = typeof o.lng === "number" ? o.lng : parseFloat(String(o.lng));
   if (o?.featured !== undefined) out.featured = Boolean(o.featured);
 
   if (o?.images !== undefined) {
     out.images = Array.isArray(o.images)
       ? (o.images as string[]).filter((x) => typeof x === "string")
       : typeof o.images === "string" && o.images.trim()
-        ? o.images.split(",").map((s) => s.trim()).filter(Boolean)
+        ? o.images
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [];
   }
   if (o?.features !== undefined) {
     out.features = Array.isArray(o.features)
       ? (o.features as string[]).filter((x) => typeof x === "string")
       : typeof o.features === "string" && o.features.trim()
-        ? o.features.split(",").map((s) => s.trim()).filter(Boolean)
+        ? o.features
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [];
   }
   if (o?.projectDetails !== undefined && Array.isArray(o.projectDetails)) {
@@ -96,7 +100,7 @@ function parseBody(body: unknown): Partial<NewProperty> {
         x != null &&
         typeof x === "object" &&
         typeof (x as ProjectDetail).label === "string" &&
-        typeof (x as ProjectDetail).value === "string"
+        typeof (x as ProjectDetail).value === "string",
     ) as ProjectDetail[];
   }
   if (o?.brochureKey !== undefined)
@@ -110,7 +114,7 @@ function parseBody(body: unknown): Partial<NewProperty> {
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const unauthorized = await requireAuth();
   if (unauthorized) return unauthorized;
@@ -118,7 +122,10 @@ export async function GET(
     const { id } = await params;
     const property = await getPropertyById(id);
     if (!property)
-      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     return NextResponse.json(property);
   } catch (err) {
     const message =
@@ -129,7 +136,7 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const unauthorized = await requireAuth();
   if (unauthorized) return unauthorized;
@@ -137,7 +144,10 @@ export async function PATCH(
     const { id } = await params;
     const property = await getPropertyById(id);
     if (!property)
-      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     const body = await request.json();
     const data = parseBody(body);
     const updated = await updateProperty(id, data);
@@ -151,7 +161,7 @@ export async function PATCH(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const unauthorized = await requireAuth();
   if (unauthorized) return unauthorized;
@@ -159,7 +169,10 @@ export async function DELETE(
     const { id } = await params;
     const property = await getPropertyById(id);
     if (!property)
-      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     await deleteProperty(id);
     return NextResponse.json({ ok: true });
   } catch (err) {

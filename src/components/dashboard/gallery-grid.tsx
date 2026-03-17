@@ -19,6 +19,7 @@ import {
 import { Loader2Icon, Trash2Icon, UploadIcon } from "lucide-react";
 import type { GalleryImage } from "@/drizzle";
 import { getCdnBaseUrl, getCdnImageUrl } from "@/lib/utils";
+import { useStorage } from "@/hooks/use-storage";
 
 interface GalleryGridProps {
   images: GalleryImage[];
@@ -36,6 +37,7 @@ export function GalleryGrid({ images }: GalleryGridProps) {
     total: number;
   } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { uploadFiles, loading: storageLoading, error: storageError } = useStorage();
 
   useEffect(() => {
     if (images.length === 0) {
@@ -81,27 +83,15 @@ export function GalleryGrid({ images }: GalleryGridProps) {
       .finally(() => setLoading(false));
   }, [images]);
 
-  const uploadFiles = useCallback(
+  const handleUpload = useCallback(
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return;
       setUploadError(null);
       setUploading(true);
       setUploadProgress({ current: 0, total: acceptedFiles.length });
       try {
-        for (let i = 0; i < acceptedFiles.length; i++) {
-          setUploadProgress({ current: i + 1, total: acceptedFiles.length });
-          const file = acceptedFiles[i];
-          const formData = new FormData();
-          formData.append("file", file);
-          const uploadRes = await fetch("/api/storage/upload", {
-            method: "POST",
-            body: formData,
-          });
-          if (!uploadRes.ok) {
-            const d = await uploadRes.json();
-            throw new Error(d.error ?? "Upload failed");
-          }
-          const { key } = await uploadRes.json();
+        const uploaded = await uploadFiles(acceptedFiles, "gallery");
+        for (const { key } of uploaded) {
           const createRes = await fetch("/api/gallery", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -121,14 +111,14 @@ export function GalleryGrid({ images }: GalleryGridProps) {
         setUploading(false);
       }
     },
-    [router],
+    [router, uploadFiles],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [] },
     multiple: true,
     disabled: uploading,
-    onDropAccepted: uploadFiles,
+    onDropAccepted: handleUpload,
     onDropRejected: (fileRejections) => {
       const msg = fileRejections
         .flatMap((r) => r.errors.map((e) => e.message))

@@ -6,37 +6,70 @@ export interface UploadResult {
   key: string;
 }
 
+function getExtension(file: File): string {
+  const fromName = file.name.split(".").pop()?.toLowerCase();
+  if (fromName) return fromName;
+  if (file.type.startsWith("image/")) return file.type.split("/")[1] || "jpg";
+  if (file.type === "application/pdf") return "pdf";
+  return "bin";
+}
+
+function generateObjectKey(prefix: string, file: File): string {
+  const ext = getExtension(file);
+  return `${prefix}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+}
+
 async function uploadOne(file: File, prefix: string): Promise<UploadResult> {
-  const formData = new FormData();
-  formData.set("file", file);
-  formData.set("prefix", prefix);
-  const res = await fetch("/api/storage/upload", {
+  const key = generateObjectKey(prefix, file);
+
+  // Ask the backend for a presigned PUT URL for this key
+  const signedRes = await fetch("/api/storage", {
     method: "POST",
-    body: formData,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      key,
+      operation: "put",
+    }),
   });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
+
+  if (!signedRes.ok) {
+    const data = await signedRes.json().catch(() => ({}));
     throw new Error(
-      (data as { error?: string }).error ?? `Upload failed: ${res.status}`,
+      (data as { error?: string }).error ??
+        `Failed to get upload URL: ${signedRes.status}`,
     );
   }
-  const data = (await res.json()) as { key?: string };
-  if (!data.key) throw new Error("Upload response missing key");
-  return { key: data.key };
+
+  const { url } = (await signedRes.json()) as { url?: string };
+  if (!url) {
+    throw new Error("Upload URL response missing url");
+  }
+
+  // Upload directly to object storage using the presigned URL
+  const putRes = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+    },
+    body: file,
+  });
+
+  if (!putRes.ok) {
+    throw new Error(`Upload failed: ${putRes.status}`);
+  }
+
+  return { key };
 }
 
 export interface UseStorageReturn {
   /** Upload multiple files. Returns array of { key } in same order as input files. */
-  uploadFiles: (
-    files: File[],
-    directory?: string,
-  ) => Promise<UploadResult[]>;
+  uploadFiles: (files: File[], directory?: string) => Promise<UploadResult[]>;
   loading: boolean;
   error: Error | null;
 }
 
 /**
- * Hook for uploading files to storage (S3/R2) via /api/storage/upload.
+ * Hook for uploading files to storage (S3/R2) via presigned URLs from /api/storage.
  * Uses TanStack Query mutation under the hood.
  */
 export function useStorage(): UseStorageReturn {
