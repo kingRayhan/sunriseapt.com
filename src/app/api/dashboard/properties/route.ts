@@ -70,14 +70,20 @@ function parseBody(body: unknown): Partial<NewProperty> & { title: string } {
   if (Array.isArray(o?.images)) {
     images = o.images.filter((x): x is string => typeof x === "string");
   } else if (typeof o?.images === "string" && o.images.trim()) {
-    images = o.images.split(",").map((s) => s.trim()).filter(Boolean);
+    images = o.images
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
 
   let features: string[] = [];
   if (Array.isArray(o?.features)) {
     features = o.features.filter((x): x is string => typeof x === "string");
   } else if (typeof o?.features === "string" && o.features.trim()) {
-    features = o.features.split(",").map((s) => s.trim()).filter(Boolean);
+    features = o.features
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
 
   let projectDetails: ProjectDetail[] = [];
@@ -87,7 +93,7 @@ function parseBody(body: unknown): Partial<NewProperty> & { title: string } {
         x != null &&
         typeof x === "object" &&
         typeof (x as ProjectDetail).label === "string" &&
-        typeof (x as ProjectDetail).value === "string"
+        typeof (x as ProjectDetail).value === "string",
     );
   }
 
@@ -96,7 +102,7 @@ function parseBody(body: unknown): Partial<NewProperty> & { title: string } {
     slug,
     description:
       typeof o?.description === "string" ? o.description.trim() || null : null,
-    price,
+    price: price === "" ? "0" : price,
     type:
       typeof o?.type === "string" && o.type.trim()
         ? o.type.trim()
@@ -105,16 +111,20 @@ function parseBody(body: unknown): Partial<NewProperty> & { title: string } {
       typeof o?.status === "string" && o.status.trim()
         ? o.status.trim()
         : "available",
-    bedrooms: Number.isInteger(bedrooms) ? bedrooms : 0,
-    bathrooms: Number.isInteger(bathrooms) ? bathrooms : 0,
-    area,
-    yearBuilt: Number.isInteger(yearBuilt) ? yearBuilt : undefined,
+    bedrooms: Number.isInteger(bedrooms) && bedrooms >= 0 ? bedrooms : 0,
+    bathrooms: Number.isInteger(bathrooms) && bathrooms >= 0 ? bathrooms : 0,
+    area: area === "" ? "0" : area,
+    ...(Number.isInteger(yearBuilt) && yearBuilt > 0 ? { yearBuilt } : {}),
     location:
-      typeof o?.location === "string" ? o.location.trim() || null : null,
+      typeof o?.location === "string" && o.location.trim()
+        ? o.location.trim()
+        : null,
     address:
-      typeof o?.address === "string" ? o.address.trim() || null : null,
-    lat: typeof lat === "number" && !Number.isNaN(lat) ? lat : undefined,
-    lng: typeof lng === "number" && !Number.isNaN(lng) ? lng : undefined,
+      typeof o?.address === "string" && o.address.trim()
+        ? o.address.trim()
+        : null,
+    ...(typeof lat === "number" && !Number.isNaN(lat) ? { lat } : {}),
+    ...(typeof lng === "number" && !Number.isNaN(lng) ? { lng } : {}),
     featured: Boolean(o?.featured),
     images,
     features,
@@ -148,6 +158,7 @@ export async function POST(request: Request) {
     const property = await createProperty(data);
     return NextResponse.json(property);
   } catch (err) {
+    console.error(JSON.stringify(err, null, 2));
     const message =
       err instanceof Error ? err.message : "Failed to create property";
     return NextResponse.json({ error: message }, { status: 400 });

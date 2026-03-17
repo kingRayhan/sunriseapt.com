@@ -16,11 +16,16 @@ export default function NewPropertyPage() {
         const res = await fetch("/api/dashboard/properties", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: "New Property" }),
+          body: JSON.stringify({
+            title: "New Property",
+            slug: `new-property-${Date.now()}`.toLowerCase(),
+          }),
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error((data as { error?: string }).error ?? "Failed to create property");
+          throw new Error(
+            (data as { error?: string }).error ?? "Failed to create property",
+          );
         }
         const property = (await res.json()) as { id: string };
         if (!cancelled && property?.id) {
@@ -28,7 +33,9 @@ export default function NewPropertyPage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to create property");
+          setError(
+            err instanceof Error ? err.message : "Failed to create property",
+          );
         }
       }
     }

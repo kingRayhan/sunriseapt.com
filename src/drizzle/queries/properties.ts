@@ -70,16 +70,16 @@ export async function getRelatedProperties(
 }
 
 export async function createProperty(data: NewProperty) {
-  const [row] = await db
-    .insert(propertiesTable)
-    .values(data)
-    .returning();
+  const clean = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined),
+  ) as NewProperty;
+  const [row] = await db.insert(propertiesTable).values(clean).returning();
   return row;
 }
 
 export async function updateProperty(
   id: string,
-  data: Partial<Omit<NewProperty, "id" | "createdAt">>
+  data: Partial<Omit<NewProperty, "id" | "createdAt">>,
 ) {
   const [row] = await db
     .update(propertiesTable)
