@@ -7,6 +7,7 @@ import {
 } from "@/drizzle/queries/properties";
 import type { NewProperty } from "@/drizzle/schema";
 import type { ProjectDetail } from "@/drizzle/schema";
+import { z } from "zod";
 
 function slugify(s: string): string {
   return s
@@ -17,97 +18,119 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+const projectDetailSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+});
+
+const trimToUndefined = (v: unknown) =>
+  typeof v === "string" ? (v.trim() === "" ? undefined : v.trim()) : v;
+
+const numericStringSchema = z.preprocess((v) => {
+  if (v == null) return undefined;
+  if (typeof v === "number") return String(v);
+  if (typeof v === "string") return v.trim() || undefined;
+  return undefined;
+}, z.string().optional());
+
+const intSchema = z.preprocess((v) => {
+  if (v == null || v === "") return undefined;
+  if (typeof v === "number") return v;
+  if (typeof v === "string") {
+    const n = parseInt(v, 10);
+    return Number.isNaN(n) ? undefined : n;
+  }
+  return undefined;
+}, z.number().int().optional());
+
+const floatSchema = z.preprocess((v) => {
+  if (v == null || v === "") return undefined;
+  if (typeof v === "number") return v;
+  if (typeof v === "string") {
+    const n = parseFloat(v);
+    return Number.isNaN(n) ? undefined : n;
+  }
+  return undefined;
+}, z.number().optional());
+
+const stringOrNullSchema = z.preprocess((v) => {
+  if (v === undefined) return undefined; // PATCH: absent means "don't touch"
+  if (v == null) return null;
+  if (typeof v === "string") return v.trim() || null;
+  return null;
+}, z.string().nullable().optional());
+
+const stringArraySchema = z.preprocess((v) => {
+  if (v === undefined) return undefined; // PATCH semantics
+  if (Array.isArray(v)) return v;
+  if (typeof v === "string") {
+    const t = v.trim();
+    if (!t) return [];
+    return t
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}, z.array(z.string()).optional());
+
+const patchBodySchema = z
+  .object({
+    title: z.preprocess(trimToUndefined, z.string().min(1).optional()),
+    slug: z.preprocess(trimToUndefined, z.string().min(1).optional()),
+    description: stringOrNullSchema,
+    price: numericStringSchema,
+    type: z.preprocess(trimToUndefined, z.string().min(1).optional()),
+    status: z.preprocess(trimToUndefined, z.string().min(1).optional()),
+    bedrooms: intSchema,
+    bathrooms: intSchema,
+    area: numericStringSchema,
+    // In DB schema, yearBuilt is a varchar, so keep it as a string.
+    yearBuilt: numericStringSchema,
+    location: stringOrNullSchema,
+    address: stringOrNullSchema,
+    lat: floatSchema,
+    lng: floatSchema,
+    featured: z.preprocess(
+      (v) => (v === undefined ? undefined : Boolean(v)),
+      z.boolean().optional(),
+    ),
+    images: stringArraySchema,
+    features: stringArraySchema,
+    projectDetails: z.preprocess(
+      (v) => (v === undefined ? undefined : v),
+      z.array(projectDetailSchema).optional(),
+    ),
+    brochureKey: z.preprocess((v) => {
+      if (v === undefined) return undefined;
+      if (v == null) return null;
+      if (typeof v === "string") return v.trim() || null;
+      return null;
+    }, z.string().nullable().optional()),
+  })
+  .strict();
+
 function parseBody(body: unknown): Partial<NewProperty> {
-  const o = body as Record<string, unknown>;
-  const out: Partial<NewProperty> = {};
+  const parsed = patchBodySchema.parse(body);
+  const out: Partial<NewProperty> = {
+    ...parsed,
+    projectDetails: parsed.projectDetails
+      ? parsed.projectDetails.map((x) => ({ label: x.label, value: x.value }))
+      : undefined,
+  };
 
-  if (typeof o?.title === "string" && o.title.trim())
-    out.title = o.title.trim();
-  if (typeof o?.slug === "string" && o.slug.trim()) out.slug = o.slug.trim();
-  else if (typeof o?.title === "string" && o.title.trim())
-    out.slug = slugify(o.title.trim());
+  // If title is provided and slug is not, generate slug from title.
+  if (out.title && !out.slug) {
+    out.slug = slugify(out.title);
+  }
 
-  if (o?.description !== undefined)
-    out.description =
-      typeof o.description === "string" ? o.description.trim() || null : null;
-  if (o?.price !== undefined)
-    out.price =
-      typeof o.price === "number"
-        ? String(o.price)
-        : typeof o.price === "string"
-          ? o.price.trim() || "0"
-          : "0";
-  if (typeof o?.type === "string" && o.type.trim()) out.type = o.type.trim();
-  if (typeof o?.status === "string" && o.status.trim())
-    out.status = o.status.trim();
-  if (o?.bedrooms !== undefined)
-    out.bedrooms =
-      typeof o.bedrooms === "number"
-        ? o.bedrooms
-        : parseInt(String(o.bedrooms), 10) || 0;
-  if (o?.bathrooms !== undefined)
-    out.bathrooms =
-      typeof o.bathrooms === "number"
-        ? o.bathrooms
-        : parseInt(String(o.bathrooms), 10) || 0;
-  if (o?.area !== undefined)
-    out.area =
-      typeof o.area === "number"
-        ? String(o.area)
-        : typeof o.area === "string"
-          ? o.area.trim() || "0"
-          : "0";
-  if (o?.yearBuilt !== undefined && o?.yearBuilt !== "")
-    out.yearBuilt =
-      typeof o.yearBuilt === "number"
-        ? o.yearBuilt
-        : parseInt(String(o.yearBuilt), 10);
-  if (o?.location !== undefined)
-    out.location =
-      typeof o.location === "string" ? o.location.trim() || null : null;
-  if (o?.address !== undefined)
-    out.address =
-      typeof o.address === "string" ? o.address.trim() || null : null;
-  if (o?.lat !== undefined && o?.lat !== "")
-    out.lat = typeof o.lat === "number" ? o.lat : parseFloat(String(o.lat));
-  if (o?.lng !== undefined && o?.lng !== "")
-    out.lng = typeof o.lng === "number" ? o.lng : parseFloat(String(o.lng));
-  if (o?.featured !== undefined) out.featured = Boolean(o.featured);
+  // Normalize numeric strings.
+  if (out.price !== undefined) out.price = out.price || "0";
+  if (out.area !== undefined) out.area = out.area || "0";
 
-  if (o?.images !== undefined) {
-    out.images = Array.isArray(o.images)
-      ? (o.images as string[]).filter((x) => typeof x === "string")
-      : typeof o.images === "string" && o.images.trim()
-        ? o.images
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-  }
-  if (o?.features !== undefined) {
-    out.features = Array.isArray(o.features)
-      ? (o.features as string[]).filter((x) => typeof x === "string")
-      : typeof o.features === "string" && o.features.trim()
-        ? o.features
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-  }
-  if (o?.projectDetails !== undefined && Array.isArray(o.projectDetails)) {
-    out.projectDetails = (o.projectDetails as unknown[]).filter(
-      (x): x is ProjectDetail =>
-        x != null &&
-        typeof x === "object" &&
-        typeof (x as ProjectDetail).label === "string" &&
-        typeof (x as ProjectDetail).value === "string",
-    ) as ProjectDetail[];
-  }
-  if (o?.brochureKey !== undefined)
-    out.brochureKey =
-      typeof o.brochureKey === "string" && o.brochureKey.trim()
-        ? o.brochureKey.trim()
-        : null;
+  // Ensure non-negative ints where applicable.
+  if (out.bedrooms !== undefined && out.bedrooms < 0) out.bedrooms = 0;
+  if (out.bathrooms !== undefined && out.bathrooms < 0) out.bathrooms = 0;
 
   return out;
 }
@@ -153,6 +176,13 @@ export async function PATCH(
     const updated = await updateProperty(id, data);
     return NextResponse.json(updated);
   } catch (err) {
+    console.log(JSON.stringify(err, null, 2));
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request body", issues: err.issues },
+        { status: 400 },
+      );
+    }
     const message =
       err instanceof Error ? err.message : "Failed to update property";
     return NextResponse.json({ error: message }, { status: 400 });

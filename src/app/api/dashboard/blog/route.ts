@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/require-auth";
 import { getAllPosts, createPost } from "@/drizzle/queries/blog";
 import type { NewBlogPost } from "@/drizzle/schema";
+import { z } from "zod";
 
 function slugify(s: string): string {
   return s
@@ -12,34 +13,61 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+const trimToUndefined = (v: unknown) =>
+  typeof v === "string" ? (v.trim() === "" ? undefined : v.trim()) : v;
+
+const stringOrNullSchema = z.preprocess((v) => {
+  if (v == null) return null;
+  if (typeof v === "string") return v.trim() || null;
+  return null;
+}, z.string().nullable());
+
+const dateIsoSchema = z.preprocess(
+  (v) => {
+    if (v == null || v === "") return undefined;
+    if (v instanceof Date) return v;
+    if (typeof v === "string") return new Date(v);
+    return undefined;
+  },
+  z
+    .date()
+    .optional()
+    .transform((d) => (d ? d.toISOString().slice(0, 10) : undefined)),
+);
+
+const createBodySchema = z
+  .object({
+    title: z.preprocess(trimToUndefined, z.string().min(1)),
+    slug: z.preprocess(trimToUndefined, z.string().min(1)).optional(),
+    excerpt: z.preprocess(
+      (v) => (v === undefined ? null : v),
+      stringOrNullSchema,
+    ),
+    content: z.preprocess(
+      (v) => (v === undefined ? null : v),
+      stringOrNullSchema,
+    ),
+    date: dateIsoSchema.optional(),
+    imageKey: z.preprocess(
+      (v) => (v === undefined ? null : v),
+      stringOrNullSchema,
+    ),
+    published: z.preprocess((v) => Boolean(v), z.boolean()).optional(),
+  })
+  .strict();
+
 function parseBody(body: unknown): NewBlogPost {
-  const o = body as Record<string, unknown>;
-  const title = typeof o?.title === "string" ? o.title.trim() : "";
-  if (!title) throw new Error("title is required");
-
-  const slug =
-    typeof o?.slug === "string" && o.slug.trim()
-      ? o.slug.trim()
-      : slugify(title);
-
-  const dateStr = typeof o?.date === "string" ? o.date.trim() : "";
-  const date = dateStr ? new Date(dateStr) : new Date();
-  if (Number.isNaN(date.getTime())) throw new Error("Invalid date");
-  const dateValue = date.toISOString().slice(0, 10);
-
+  const parsed = createBodySchema.parse(body);
+  const slug = parsed.slug ?? slugify(parsed.title);
+  const dateValue = parsed.date ?? new Date().toISOString().slice(0, 10);
   return {
-    title,
+    title: parsed.title,
     slug,
-    excerpt:
-      typeof o?.excerpt === "string" ? o.excerpt.trim() || null : null,
-    content:
-      typeof o?.content === "string" ? o.content.trim() || null : null,
+    excerpt: parsed.excerpt ?? null,
+    content: parsed.content ?? null,
     date: dateValue,
-    imageKey:
-      typeof o?.imageKey === "string" && o.imageKey.trim()
-        ? o.imageKey.trim()
-        : null,
-    published: Boolean(o?.published),
+    imageKey: parsed.imageKey ?? null,
+    published: parsed.published ?? false,
   };
 }
 
@@ -50,8 +78,7 @@ export async function GET() {
     const posts = await getAllPosts();
     return NextResponse.json(posts);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to list posts";
+    const message = err instanceof Error ? err.message : "Failed to list posts";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -65,6 +92,12 @@ export async function POST(request: Request) {
     const post = await createPost(data);
     return NextResponse.json(post);
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request body", issues: err.issues },
+        { status: 400 },
+      );
+    }
     const message =
       err instanceof Error ? err.message : "Failed to create post";
     return NextResponse.json({ error: message }, { status: 400 });

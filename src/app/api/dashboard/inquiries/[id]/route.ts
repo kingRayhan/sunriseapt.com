@@ -5,13 +5,19 @@ import {
   updateInquiry,
   deleteInquiry,
 } from "@/drizzle/queries/contact";
+import { z } from "zod";
+
+const patchBodySchema = z
+  .object({
+    status: z.preprocess(
+      (v) => (typeof v === "string" ? v.trim() : v),
+      z.string().min(1).optional(),
+    ),
+  })
+  .strict();
 
 function parseBody(body: unknown): { status?: string } {
-  const o = body as Record<string, unknown>;
-  const out: { status?: string } = {};
-  if (typeof o?.status === "string" && o.status.trim())
-    out.status = o.status.trim();
-  return out;
+  return patchBodySchema.parse(body);
 }
 
 export async function GET(
@@ -51,6 +57,12 @@ export async function PATCH(
     const updated = await updateInquiry(id, data);
     return NextResponse.json(updated);
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request body", issues: err.issues },
+        { status: 400 },
+      );
+    }
     const message =
       err instanceof Error ? err.message : "Failed to update inquiry";
     return NextResponse.json({ error: message }, { status: 400 });

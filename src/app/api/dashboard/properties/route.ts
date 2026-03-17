@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/require-auth";
 import { getAllProperties, createProperty } from "@/drizzle/queries/properties";
 import type { NewProperty } from "@/drizzle/schema";
 import type { ProjectDetail } from "@/drizzle/schema";
+import { z } from "zod";
 
 function slugify(s: string): string {
   return s
@@ -13,126 +14,135 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-function parseBody(body: unknown): Partial<NewProperty> & { title: string } {
-  const o = body as Record<string, unknown>;
-  const title = typeof o?.title === "string" ? o.title.trim() : "";
-  if (!title) throw new Error("title is required");
+const trimToUndefined = (v: unknown) =>
+  typeof v === "string" ? (v.trim() === "" ? undefined : v.trim()) : v;
 
-  const slug =
-    typeof o?.slug === "string" && o.slug.trim()
-      ? o.slug.trim()
-      : slugify(title);
+const numericStringSchema = z.preprocess((v) => {
+  if (v == null) return undefined;
+  if (typeof v === "number") return String(v);
+  if (typeof v === "string") return v.trim() || undefined;
+  return undefined;
+}, z.string().optional());
 
-  const price =
-    typeof o?.price === "number"
-      ? String(o.price)
-      : typeof o?.price === "string"
-        ? o.price.trim() || "0"
-        : "0";
+const intSchema = z.preprocess((v) => {
+  if (v == null || v === "") return undefined;
+  if (typeof v === "number") return v;
+  if (typeof v === "string") {
+    const n = parseInt(v, 10);
+    return Number.isNaN(n) ? undefined : n;
+  }
+  return undefined;
+}, z.number().int().optional());
+
+const floatSchema = z.preprocess((v) => {
+  if (v == null || v === "") return undefined;
+  if (typeof v === "number") return v;
+  if (typeof v === "string") {
+    const n = parseFloat(v);
+    return Number.isNaN(n) ? undefined : n;
+  }
+  return undefined;
+}, z.number().optional());
+
+const stringOrNullSchema = z.preprocess((v) => {
+  if (v == null) return null;
+  if (typeof v === "string") return v.trim() || null;
+  return null;
+}, z.string().nullable());
+
+const stringArraySchema = z.preprocess((v) => {
+  if (Array.isArray(v)) return v;
+  if (typeof v === "string") {
+    const t = v.trim();
+    if (!t) return [];
+    return t
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}, z.array(z.string()));
+
+const projectDetailSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+});
+
+const createBodySchema = z
+  .object({
+    title: z.preprocess(trimToUndefined, z.string().min(1)),
+    slug: z.preprocess(trimToUndefined, z.string().min(1)).optional(),
+    description: z.preprocess(
+      (v) => (v === undefined ? null : v),
+      stringOrNullSchema,
+    ),
+    price: numericStringSchema.optional(),
+    type: z.preprocess(trimToUndefined, z.string().min(1)).optional(),
+    status: z.preprocess(trimToUndefined, z.string().min(1)).optional(),
+    bedrooms: intSchema.optional(),
+    bathrooms: intSchema.optional(),
+    area: numericStringSchema.optional(),
+    // In DB schema, yearBuilt is a varchar, so keep it as a string.
+    yearBuilt: numericStringSchema.optional(),
+    location: z
+      .preprocess((v) => (v === undefined ? null : v), stringOrNullSchema)
+      .optional(),
+    address: z
+      .preprocess((v) => (v === undefined ? null : v), stringOrNullSchema)
+      .optional(),
+    lat: floatSchema.optional(),
+    lng: floatSchema.optional(),
+    featured: z.preprocess((v) => Boolean(v), z.boolean()).optional(),
+    images: stringArraySchema.optional(),
+    features: stringArraySchema.optional(),
+    projectDetails: z.array(projectDetailSchema).optional(),
+    brochureKey: z
+      .preprocess((v) => {
+        if (v == null) return null;
+        if (typeof v === "string") return v.trim() || null;
+        return null;
+      }, z.string().nullable())
+      .optional(),
+  })
+  .strict();
+
+function parseBody(body: unknown): NewProperty {
+  const parsed = createBodySchema.parse(body);
+  const projectDetails: ProjectDetail[] = (parsed.projectDetails ?? []).map(
+    (x) => ({ label: x.label, value: x.value }),
+  );
+
+  const title = parsed.title;
+  const slug = parsed.slug ?? slugify(title);
+
+  const price = parsed.price?.trim() || "0";
+  const area = parsed.area?.trim() || "0";
+  const yearBuilt = parsed.yearBuilt?.trim();
   const bedrooms =
-    typeof o?.bedrooms === "number"
-      ? o.bedrooms
-      : typeof o?.bedrooms === "string"
-        ? parseInt(o.bedrooms, 10) || 0
-        : 0;
+    parsed.bedrooms != null && parsed.bedrooms >= 0 ? parsed.bedrooms : 0;
   const bathrooms =
-    typeof o?.bathrooms === "number"
-      ? o.bathrooms
-      : typeof o?.bathrooms === "string"
-        ? parseInt(o.bathrooms, 10) || 0
-        : 0;
-  const area =
-    typeof o?.area === "number"
-      ? String(o.area)
-      : typeof o?.area === "string"
-        ? o.area.trim() || "0"
-        : "0";
-  const yearBuilt =
-    o?.yearBuilt != null && o?.yearBuilt !== ""
-      ? typeof o.yearBuilt === "number"
-        ? o.yearBuilt
-        : parseInt(String(o.yearBuilt), 10)
-      : undefined;
-  const lat =
-    o?.lat != null && o?.lat !== ""
-      ? typeof o.lat === "number"
-        ? o.lat
-        : parseFloat(String(o.lat))
-      : undefined;
-  const lng =
-    o?.lng != null && o?.lng !== ""
-      ? typeof o.lng === "number"
-        ? o.lng
-        : parseFloat(String(o.lng))
-      : undefined;
-
-  let images: string[] = [];
-  if (Array.isArray(o?.images)) {
-    images = o.images.filter((x): x is string => typeof x === "string");
-  } else if (typeof o?.images === "string" && o.images.trim()) {
-    images = o.images
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-
-  let features: string[] = [];
-  if (Array.isArray(o?.features)) {
-    features = o.features.filter((x): x is string => typeof x === "string");
-  } else if (typeof o?.features === "string" && o.features.trim()) {
-    features = o.features
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-
-  let projectDetails: ProjectDetail[] = [];
-  if (Array.isArray(o?.projectDetails)) {
-    projectDetails = o.projectDetails.filter(
-      (x): x is ProjectDetail =>
-        x != null &&
-        typeof x === "object" &&
-        typeof (x as ProjectDetail).label === "string" &&
-        typeof (x as ProjectDetail).value === "string",
-    );
-  }
+    parsed.bathrooms != null && parsed.bathrooms >= 0 ? parsed.bathrooms : 0;
 
   return {
     title,
     slug,
-    description:
-      typeof o?.description === "string" ? o.description.trim() || null : null,
-    price: price === "" ? "0" : price,
-    type:
-      typeof o?.type === "string" && o.type.trim()
-        ? o.type.trim()
-        : "apartment",
-    status:
-      typeof o?.status === "string" && o.status.trim()
-        ? o.status.trim()
-        : "available",
-    bedrooms: Number.isInteger(bedrooms) && bedrooms >= 0 ? bedrooms : 0,
-    bathrooms: Number.isInteger(bathrooms) && bathrooms >= 0 ? bathrooms : 0,
-    area: area === "" ? "0" : area,
-    ...(Number.isInteger(yearBuilt) && yearBuilt > 0 ? { yearBuilt } : {}),
-    location:
-      typeof o?.location === "string" && o.location.trim()
-        ? o.location.trim()
-        : null,
-    address:
-      typeof o?.address === "string" && o.address.trim()
-        ? o.address.trim()
-        : null,
-    ...(typeof lat === "number" && !Number.isNaN(lat) ? { lat } : {}),
-    ...(typeof lng === "number" && !Number.isNaN(lng) ? { lng } : {}),
-    featured: Boolean(o?.featured),
-    images,
-    features,
+    description: parsed.description ?? null,
+    price,
+    type: parsed.type ?? "apartment",
+    status: parsed.status ?? "available",
+    bedrooms,
+    bathrooms,
+    area,
+    ...(yearBuilt ? { yearBuilt } : {}),
+    location: parsed.location ?? null,
+    address: parsed.address ?? null,
+    ...(typeof parsed.lat === "number" ? { lat: parsed.lat } : {}),
+    ...(typeof parsed.lng === "number" ? { lng: parsed.lng } : {}),
+    featured: parsed.featured ?? false,
+    images: parsed.images ?? [],
+    features: parsed.features ?? [],
     projectDetails,
-    brochureKey:
-      typeof o?.brochureKey === "string" && o.brochureKey.trim()
-        ? o.brochureKey.trim()
-        : null,
+    brochureKey: parsed.brochureKey ?? null,
   };
 }
 
@@ -154,11 +164,16 @@ export async function POST(request: Request) {
   if (unauthorized) return unauthorized;
   try {
     const body = await request.json();
-    const data = parseBody(body) as NewProperty;
+    const data = parseBody(body);
     const property = await createProperty(data);
     return NextResponse.json(property);
   } catch (err) {
-    console.error(JSON.stringify(err, null, 2));
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request body", issues: err.issues },
+        { status: 400 },
+      );
+    }
     const message =
       err instanceof Error ? err.message : "Failed to create property";
     return NextResponse.json({ error: message }, { status: 400 });

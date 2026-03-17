@@ -3,6 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/require-auth";
 import { getBucket, getS3Client } from "@/lib/s3";
+import { z } from "zod";
 
 const SIGNED_URL_EXPIRES_IN = 3600; // 1 hour
 
@@ -11,24 +12,24 @@ export async function POST(request: Request) {
   if (unauthorized) return unauthorized;
   try {
     const body = await request.json();
-    const {
-      key,
-      keys,
-      operation = "get",
-    } = body as {
-      key?: string;
-      keys?: string[];
-      operation?: "get" | "put";
-    };
 
-    const keyList: string[] =
-      keys && Array.isArray(keys)
-        ? keys
-            .map((k) => (typeof k === "string" ? k.trim() : ""))
-            .filter(Boolean)
-        : key && typeof key === "string" && key.trim() !== ""
-          ? [key.trim()]
-          : [];
+    const bodySchema = z
+      .object({
+        key: z.preprocess(
+          (v) => (typeof v === "string" ? v.trim() : v),
+          z.string().min(1).optional(),
+        ),
+        keys: z.array(z.string()).optional(),
+        operation: z.enum(["get", "put"]).default("get"),
+      })
+      .strict();
+
+    const parsed = bodySchema.parse(body);
+    const keyList: string[] = parsed.keys
+      ? parsed.keys.map((k) => k.trim()).filter(Boolean)
+      : parsed.key
+        ? [parsed.key]
+        : [];
 
     if (keyList.length === 0) {
       return NextResponse.json(
@@ -37,14 +38,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (operation !== "get" && operation !== "put") {
-      return NextResponse.json(
-        { error: "Invalid 'operation'. Use 'get' or 'put'" },
-        { status: 400 },
-      );
-    }
-
-    if (operation === "put" && keyList.length > 1) {
+    if (parsed.operation === "put" && keyList.length > 1) {
       return NextResponse.json(
         { error: "Batch presigned URLs are only supported for 'get'" },
         { status: 400 },
@@ -54,7 +48,7 @@ export async function POST(request: Request) {
     const client = getS3Client();
     const bucket = getBucket();
 
-    if (operation === "get") {
+    if (parsed.operation === "get") {
       const urls = await Promise.all(
         keyList.map((k) =>
           getSignedUrl(
@@ -77,6 +71,12 @@ export async function POST(request: Request) {
     );
     return NextResponse.json({ url });
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request body", issues: err.issues },
+        { status: 400 },
+      );
+    }
     const message =
       err instanceof Error ? err.message : "Failed to generate signed URL";
     return NextResponse.json(
@@ -92,17 +92,25 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { key } = body as { key?: string };
-    if (!key || typeof key !== "string" || key.trim() === "") {
+    const bodySchema = z
+      .object({
+        key: z.preprocess(
+          (v) => (typeof v === "string" ? v.trim() : v),
+          z.string().min(1),
+        ),
+      })
+      .strict();
+    const { key } = bodySchema.parse(body);
+    const { deleteS3Object } = await import("@/lib/s3");
+    await deleteS3Object(key);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Missing or invalid 'key' in request body" },
+        { error: "Invalid request body", issues: err.issues },
         { status: 400 },
       );
     }
-    const { deleteS3Object } = await import("@/lib/s3");
-    await deleteS3Object(key.trim());
-    return NextResponse.json({ ok: true });
-  } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to delete object";
     return NextResponse.json(

@@ -6,6 +6,7 @@ import {
   deletePost,
 } from "@/drizzle/queries/blog";
 import type { NewBlogPost } from "@/drizzle/schema";
+import { z } from "zod";
 
 function slugify(s: string): string {
   return s
@@ -16,33 +17,55 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-function parseBody(body: unknown): Partial<Omit<NewBlogPost, "id" | "createdAt">> {
-  const o = body as Record<string, unknown>;
-  const out: Partial<Omit<NewBlogPost, "id" | "createdAt">> = {};
+const trimToUndefined = (v: unknown) =>
+  typeof v === "string" ? (v.trim() === "" ? undefined : v.trim()) : v;
 
-  if (typeof o?.title === "string" && o.title.trim()) out.title = o.title.trim();
-  if (typeof o?.slug === "string" && o.slug.trim()) out.slug = o.slug.trim();
-  else if (typeof o?.title === "string" && o.title.trim())
-    out.slug = slugify(o.title.trim());
+const stringOrNullSchema = z.preprocess(
+  (v) => {
+    if (v === undefined) return undefined; // PATCH semantics
+    if (v == null) return null;
+    if (typeof v === "string") return v.trim() || null;
+    return null;
+  },
+  z.string().nullable().optional(),
+);
 
-  if (o?.excerpt !== undefined)
-    out.excerpt =
-      typeof o.excerpt === "string" ? o.excerpt.trim() || null : null;
-  if (o?.content !== undefined)
-    out.content =
-      typeof o.content === "string" ? o.content.trim() || null : null;
-  if (o?.date !== undefined && o?.date !== "") {
-    const d = typeof o.date === "string" ? new Date(o.date) : (o.date as Date);
-    if (!Number.isNaN(d.getTime()))
-      (out as { date?: string }).date = d.toISOString().slice(0, 10);
-  }
-  if (o?.imageKey !== undefined)
-    out.imageKey =
-      typeof o.imageKey === "string" && o.imageKey.trim()
-        ? o.imageKey.trim()
-        : null;
-  if (o?.published !== undefined) out.published = Boolean(o.published);
+const dateIsoSchema = z.preprocess(
+  (v) => {
+    if (v === undefined || v === "") return undefined;
+    if (v instanceof Date) return v;
+    if (typeof v === "string") return new Date(v);
+    return undefined;
+  },
+  z
+    .date()
+    .optional()
+    .transform((d) => (d ? d.toISOString().slice(0, 10) : undefined)),
+);
 
+const patchBodySchema = z
+  .object({
+    title: z.preprocess(trimToUndefined, z.string().min(1).optional()),
+    slug: z.preprocess(trimToUndefined, z.string().min(1).optional()),
+    excerpt: stringOrNullSchema,
+    content: stringOrNullSchema,
+    date: dateIsoSchema.optional(),
+    imageKey: stringOrNullSchema,
+    published: z.preprocess(
+      (v) => (v === undefined ? undefined : Boolean(v)),
+      z.boolean().optional(),
+    ),
+  })
+  .strict();
+
+function parseBody(
+  body: unknown,
+): Partial<Omit<NewBlogPost, "id" | "createdAt">> {
+  const parsed = patchBodySchema.parse(body);
+  const out: Partial<Omit<NewBlogPost, "id" | "createdAt">> = {
+    ...parsed,
+  };
+  if (out.title && !out.slug) out.slug = slugify(out.title);
   return out;
 }
 
@@ -81,6 +104,12 @@ export async function PATCH(
     const updated = await updatePost(id, data);
     return NextResponse.json(updated);
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request body", issues: err.issues },
+        { status: 400 },
+      );
+    }
     const message =
       err instanceof Error ? err.message : "Failed to update post";
     return NextResponse.json({ error: message }, { status: 400 });
