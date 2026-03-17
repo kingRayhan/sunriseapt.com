@@ -859,7 +859,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     ) : (
                       <>
                         <UploadIcon className="mr-2 h-4 w-4" />
-                        Upload PDF
+                        Upload PDF (max 20MB)
                       </>
                     )}
                   </Button>
