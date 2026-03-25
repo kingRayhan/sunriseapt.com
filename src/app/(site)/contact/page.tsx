@@ -1,6 +1,26 @@
+import type { Metadata } from "next";
 import { getSiteSettings } from "@/drizzle/queries/settings";
 import { SETTING_KEYS } from "@/lib/settings-keys";
+import { SITE_NAME } from "@/lib/seo";
 import { ContactPageContent } from "./ContactPageContent";
+
+const description =
+  "Contact Sunriseapt — phone, email, and address. Reach our team for property inquiries and support.";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description,
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    url: "/contact",
+    title: `Contact | ${SITE_NAME}`,
+    description,
+  },
+  twitter: {
+    title: `Contact | ${SITE_NAME}`,
+    description,
+  },
+};
 
 function parseStringArray(value: string): string[] {
   if (!value?.trim()) return [];

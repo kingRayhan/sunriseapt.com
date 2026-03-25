@@ -1,23 +1,46 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import {
+  DEFAULT_DESCRIPTION,
+  SITE_NAME,
+  getSiteUrl,
+} from "@/lib/seo";
 import { Providers } from "./providers";
 import "./globals.css";
 
+const defaultTitle = `${SITE_NAME} - Premium Real Estate`;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "Sunriseapt - Premium Real Estate",
-    template: "%s | Sunriseapt",
+    default: defaultTitle,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Sunrise Apartments ltd is a Real Estate company that creates living spaces that seamlessly blend luxury and nature. We believe that everyone deserves to live in a beautiful, sustainable environment, and we are committed to creating apartments that are both stylish and eco-friendly.",
+  description: DEFAULT_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Sunrise Apartments ltd - Premium Real Estate",
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: SITE_NAME,
+    title: defaultTitle,
+    description: DEFAULT_DESCRIPTION,
+    images: [{ url: "/full-logo.png", alt: `${SITE_NAME} logo` }],
   },
   twitter: {
     card: "summary_large_image",
+    title: defaultTitle,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/full-logo.png"],
   },
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: "/favicon.png",
   },
 };
 

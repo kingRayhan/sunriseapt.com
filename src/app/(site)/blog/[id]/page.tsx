@@ -1,12 +1,63 @@
 import Link from "next/link";
 import { Calendar, ArrowLeft, User } from "lucide-react";
+import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getPostBySlug } from "@/drizzle/queries/blog";
+import {
+  DEFAULT_DESCRIPTION,
+  getSiteUrl,
+  truncateMetaDescription,
+} from "@/lib/seo";
 import { getCdnImageUrl } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { id } = await params;
+  const post = await getPostBySlug(id);
+  if (!post) {
+    return {
+      title: "Post not found",
+      robots: { index: false, follow: true },
+    };
+  }
+
+  const path = `/blog/${post.slug}`;
+  const description = truncateMetaDescription(
+    post.excerpt ?? post.content,
+    160,
+    DEFAULT_DESCRIPTION,
+  );
+  const absoluteImage =
+    getCdnImageUrl(post.imageKey ?? "") ?? `${getSiteUrl()}/full-logo.png`;
+
+  const published = new Date(String(post.date)).toISOString();
+
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "article",
+      url: path,
+      title: post.title,
+      description,
+      publishedTime: published,
+      ...(post.author ? { authors: [post.author] } : {}),
+      images: [{ url: absoluteImage, alt: post.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: [absoluteImage],
+    },
+  };
 }
 
 export const revalidate = 60;

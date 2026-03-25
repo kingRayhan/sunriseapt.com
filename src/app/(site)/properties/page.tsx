@@ -1,5 +1,25 @@
+import type { Metadata } from "next";
 import PropertyFilters from "@/components/PropertyFilters";
 import { getProperties } from "@/drizzle/queries/properties";
+import { SITE_NAME } from "@/lib/seo";
+
+const description =
+  "Browse premium apartments and properties from Sunriseapt. Filter by type and find your next home.";
+
+export const metadata: Metadata = {
+  title: "Properties",
+  description,
+  alternates: { canonical: "/properties" },
+  openGraph: {
+    url: "/properties",
+    title: `Properties | ${SITE_NAME}`,
+    description,
+  },
+  twitter: {
+    title: `Properties | ${SITE_NAME}`,
+    description,
+  },
+};
 
 export const revalidate = 60;
 

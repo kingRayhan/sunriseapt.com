@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Bed,
@@ -18,11 +19,61 @@ import {
   getPropertyBySlug,
   getRelatedProperties,
 } from "@/drizzle/queries/properties";
+import {
+  DEFAULT_DESCRIPTION,
+  getSiteUrl,
+  truncateMetaDescription,
+} from "@/lib/seo";
 import { getCdnImageUrl } from "@/lib/utils";
 import MapClient from "./MapClient";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { id } = await params;
+  const property = await getPropertyBySlug(id);
+  if (!property) notFound();
+
+  const path = `/properties/${property.slug}`;
+  const fromDescription = truncateMetaDescription(
+    property.description,
+    160,
+    "",
+  );
+  const fallbackBits = [property.title, property.address, property.location]
+    .filter(Boolean)
+    .join(". ");
+  const description =
+    fromDescription ||
+    truncateMetaDescription(fallbackBits, 160, DEFAULT_DESCRIPTION);
+
+  const firstKey = property.images[0];
+  const absoluteImage =
+    (firstKey ? getCdnImageUrl(firstKey) : null) ??
+    `${getSiteUrl()}/full-logo.png`;
+
+  return {
+    title: property.title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      url: path,
+      title: property.title,
+      description,
+      images: [{ url: absoluteImage, alt: property.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: property.title,
+      description,
+      images: [absoluteImage],
+    },
+  };
 }
 
 export const revalidate = 60;

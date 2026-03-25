@@ -1,7 +1,27 @@
 import { Target, Eye, Users } from "lucide-react";
+import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTeamMembers } from "@/drizzle/queries/team";
 import { getCdnImageUrl } from "@/lib/utils";
+import { SITE_NAME } from "@/lib/seo";
+
+const description =
+  "Our story, values, and team at Sunriseapt — premium real estate that blends luxury with sustainability.";
+
+export const metadata: Metadata = {
+  title: "About",
+  description,
+  alternates: { canonical: "/about" },
+  openGraph: {
+    url: "/about",
+    title: `About | ${SITE_NAME}`,
+    description,
+  },
+  twitter: {
+    title: `About | ${SITE_NAME}`,
+    description,
+  },
+};
 
 export const revalidate = 60;
 

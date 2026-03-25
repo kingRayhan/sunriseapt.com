@@ -1,9 +1,29 @@
 import Link from "next/link";
 import { Calendar, ArrowRight } from "lucide-react";
+import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getPublishedPosts } from "@/drizzle/queries/blog";
 import { getCdnImageUrl } from "@/lib/utils";
+import { SITE_NAME } from "@/lib/seo";
+
+const description =
+  "News and insights from Sunriseapt — market updates, tips, and stories from our real estate team.";
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description,
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    url: "/blog",
+    title: `Blog | ${SITE_NAME}`,
+    description,
+  },
+  twitter: {
+    title: `Blog | ${SITE_NAME}`,
+    description,
+  },
+};
 
 export const revalidate = 60;
 
