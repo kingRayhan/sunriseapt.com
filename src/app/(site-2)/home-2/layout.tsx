@@ -1,7 +1,7 @@
 import { DEFAULT_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import Footer from "./_components/Footer";
-// import Navbar from "./_components/Navbar";
+import Navbar from "./_components/Navbar";
 import "../../globals.css";
 
 const defaultTitle = `${SITE_NAME} - Premium Real Estate`;
@@ -45,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        {/* <Navbar /> */}
+        <Navbar />
         {children}
         <Footer />
       </body>
