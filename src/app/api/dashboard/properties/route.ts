@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
+import { createProperty, getAllProperties } from "@/drizzle/queries/properties";
+import type { NewProperty, ProjectDetail } from "@/drizzle/schema";
 import { requireAuth } from "@/lib/require-auth";
-import { getAllProperties, createProperty } from "@/drizzle/queries/properties";
-import type { NewProperty } from "@/drizzle/schema";
-import type { ProjectDetail } from "@/drizzle/schema";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 function slugify(s: string): string {

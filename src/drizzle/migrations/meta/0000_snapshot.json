@@ -1,5 +1,5 @@
 {
-  "id": "b9610d22-4bca-444a-921e-62ba1815ca6c",
+  "id": "529e408b-7ec1-43a0-b4a7-22c9f1365453",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -255,6 +255,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "short_description": {
+          "name": "short_description",
+          "type": "varchar(400)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "price": {
           "name": "price",
           "type": "numeric(14, 2)",
@@ -292,14 +298,14 @@
         },
         "area": {
           "name": "area",
-          "type": "numeric(10, 2)",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "year_built": {
           "name": "year_built",
-          "type": "smallint",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false
         },

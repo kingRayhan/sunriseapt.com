@@ -1,12 +1,11 @@
-import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/require-auth";
 import {
+  deleteProperty,
   getPropertyById,
   updateProperty,
-  deleteProperty,
 } from "@/drizzle/queries/properties";
 import type { NewProperty } from "@/drizzle/schema";
-import type { ProjectDetail } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/require-auth";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 function slugify(s: string): string {

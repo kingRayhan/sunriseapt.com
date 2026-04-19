@@ -1,4 +1,5 @@
 import AboutUsSection from "./_components/AboutUsSection";
+import FeaturedProjectsSection from "./_components/FeaturedProjectsSection";
 import Hero from "./_components/Hero";
 
 export default function HomePage() {
@@ -6,6 +7,7 @@ export default function HomePage() {
     <>
       <Hero />
       <AboutUsSection />
+      <FeaturedProjectsSection />
     </>
   );
 }
