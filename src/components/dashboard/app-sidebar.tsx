@@ -8,6 +8,7 @@ import {
   FileTextIcon,
   LayoutDashboardIcon,
   SettingsIcon,
+  UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
@@ -33,7 +34,7 @@ const data = {
       url: "/dashboard/inquiries",
       icon: ClipboardListIcon,
     },
-    // { title: "Team", url: "/dashboard/team", icon: UsersIcon },
+    { title: "Team", url: "/dashboard/team", icon: UsersIcon },
     { title: "Gallery", url: "/dashboard/gallery", icon: CameraIcon },
   ],
   navSecondary: [

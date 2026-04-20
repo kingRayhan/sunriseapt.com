@@ -1,6 +1,7 @@
 import PageHero from "@/components/site-2/PageHero";
 import TeamCarousel from "@/components/site-2/TeamCarousel";
-import { teamMembers } from "@/data/team";
+import { getTeamMembers } from "@/drizzle/queries/team";
+import { getCdnImageUrl } from "@/lib/utils";
 import { SITE_NAME } from "@/lib/seo";
 import type { Metadata } from "next";
 import AboutChairman from "./_components/AboutChairman";
@@ -15,12 +16,16 @@ export const metadata: Metadata = {
   description: `Learn about ${SITE_NAME} — our purpose, team, and how we build trusted residential communities.`,
 };
 
-export default function AboutPage() {
+export const revalidate = 60;
+
+export default async function AboutPage() {
+  const teamMembers = await getTeamMembers();
+
   const carouselMembers = teamMembers.map((m) => ({
     id: m.id,
     name: m.name.toUpperCase(),
     role: m.role,
-    imageSrc: m.image,
+    imageSrc: m.imageKey ? getCdnImageUrl(m.imageKey) ?? "" : "",
     imageAlt: m.name,
   }));
 

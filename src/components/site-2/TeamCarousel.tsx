@@ -9,7 +9,7 @@ export type TeamCarouselMember = {
   id: string;
   name: string;
   role?: string | null;
-  imageSrc: string;
+  imageSrc?: string | null;
   imageAlt?: string;
 };
 
@@ -105,11 +105,15 @@ export default function TeamCarousel({
               role="listitem"
               className="group relative aspect-3/4 w-[min(100%,220px)] shrink-0 snap-start overflow-hidden rounded-sm border border-border/60 bg-muted sm:w-[240px] lg:w-[260px]"
             >
-              <img
-                src={m.imageSrc}
-                alt={m.imageAlt ?? ""}
-                className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-              />
+              {m.imageSrc ? (
+                <img
+                  src={m.imageSrc}
+                  alt={m.imageAlt ?? ""}
+                  className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-muted" aria-hidden />
+              )}
               <div
                 className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.85)_0%,transparent_55%)]"
                 aria-hidden

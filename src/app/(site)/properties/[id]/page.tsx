@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyImageGallery from "@/components/PropertyImageGallery";
+import Markdown from "@/components/shared/Markdown";
 import dynamic from "next/dynamic";
 import {
   getPropertyBySlug,
@@ -146,9 +147,16 @@ export default async function PropertyDetailsPage({ params }: Props) {
 
             <div className="mb-8">
               <h2 className="text-lg font-semibold mb-3">Description</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {property.description}
-              </p>
+              {property.description ? (
+                <Markdown
+                  content={property.description}
+                  className="text-muted-foreground"
+                />
+              ) : (
+                <p className="text-muted-foreground leading-relaxed">
+                  No description provided.
+                </p>
+              )}
             </div>
 
             {property.projectDetails.length > 0 && (
