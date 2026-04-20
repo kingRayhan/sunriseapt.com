@@ -50,7 +50,7 @@ function getHeroSlides(settings: Record<string, string>): HeroSlide[] {
       result.push({
         image,
         title: s.title,
-        subtitle: s.subtitle,
+        subtitle: s.subtitle ?? s.description,
         link: s.link,
       });
   }

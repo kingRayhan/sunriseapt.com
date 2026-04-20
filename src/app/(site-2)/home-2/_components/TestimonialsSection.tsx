@@ -8,8 +8,8 @@ export default async function TestimonialsSection() {
   const rows = await getPublishedTestimonials();
   if (!rows || rows.length === 0) return null;
 
-  const items: TestimonialItem[] = rows
-    .map((t) => {
+  const items = rows
+    .map<TestimonialItem | null>((t) => {
       const posterUrl = getCdnImageUrl(t.posterKey);
       if (!posterUrl) return null;
       return {
@@ -24,7 +24,7 @@ export default async function TestimonialsSection() {
         projectBrand: t.projectBrand,
       };
     })
-    .filter((x): x is TestimonialItem => x != null);
+    .filter((x): x is TestimonialItem => x !== null);
 
   if (items.length === 0) return null;
 
