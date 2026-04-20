@@ -1,6 +1,5 @@
 "use client";
 
-import Logo from "@/components/shared/Logo";
 import LogoLight from "@/components/shared/LogoLight";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,27 +13,36 @@ import { cn } from "@/lib/utils";
 import { Menu, Phone } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SITE_2_NAV_LINKS } from "../site-2-nav";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const isHome = pathname === "/home-2";
+  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 12);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   return (
     <header
       className={cn(
-        "z-50 w-full",
-        isHome ? "absolute inset-x-0 top-0" : "sticky top-0",
-        isHome
-          ? "border-b border-white/10 bg-black/30 text-white"
-          : "border-b border-border bg-background text-foreground",
+        "fixed inset-x-0 top-0 z-50 w-full text-white",
+        scrolled
+          ? "border-b border-white/10 bg-black/70 supports-[backdrop-filter]:bg-black/40 supports-[backdrop-filter]:backdrop-blur"
+          : "border-b border-transparent bg-transparent",
       )}
     >
-      <div className="container mx-auto flex items-center gap-4 px-4 py-3 lg:px-8">
-        <Link href="/home-2" className="shrink-0" aria-label="Go to home">
-          {isHome ? <LogoLight /> : <Logo />}
+      <div
+        className="container mx-auto flex items-center gap-4 px-4 py-3 lg:px-8"
+        style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+      >
+        <Link href="/" className="shrink-0" aria-label="Go to home">
+          <LogoLight />
         </Link>
 
         <nav
@@ -44,8 +52,8 @@ export default function Navbar() {
           <ul className="flex items-center gap-7 text-sm">
             {SITE_2_NAV_LINKS.map((item) => {
               const active =
-                item.href === "/home-2"
-                  ? pathname === "/home-2"
+                item.href === "/"
+                  ? pathname === "/"
                   : pathname === item.href ||
                     pathname.startsWith(`${item.href}/`);
 
@@ -67,12 +75,10 @@ export default function Navbar() {
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <Link
-            href="/home-2/contact"
+            href="/contact"
             className={cn(
               "hidden items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-medium transition-opacity duration-200 ease-out hover:opacity-90 sm:flex",
-              isHome
-                ? "border-white/70 bg-white/5 text-white"
-                : "border-border text-foreground",
+              "border-white/70 bg-white/5 text-white",
             )}
           >
             <Phone className="size-4" aria-hidden />
@@ -87,7 +93,7 @@ export default function Navbar() {
                 size="icon"
                 className={cn(
                   "lg:hidden",
-                  isHome && "text-white hover:bg-white/10",
+                  "text-white hover:bg-white/10",
                 )}
                 aria-label="Open menu"
               >
@@ -110,7 +116,7 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <Link
-                  href="/home-2/contact"
+                  href="/contact"
                   onClick={() => setOpen(false)}
                   className="text-base font-medium"
                 >

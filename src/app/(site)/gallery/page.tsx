@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import PageHero from "@/components/site-2/PageHero";
 import { Button } from "@/components/ui/button";
 import { getGalleryImages } from "@/drizzle/queries/gallery";
-import { getCdnBaseUrl, getCdnImageUrl } from "@/lib/utils";
 import { SITE_NAME } from "@/lib/seo";
+import { getCdnBaseUrl, getCdnImageUrl } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&q=80&w=2400";
@@ -24,7 +24,9 @@ export default async function Site2GalleryPage() {
   const images = rows
     .map((img) => {
       const url = getCdnImageUrl(img.imageKey);
-      return url ? { id: img.id, url, alt: img.altText ?? "Gallery image" } : null;
+      return url
+        ? { id: img.id, url, alt: img.altText ?? "Gallery image" }
+        : null;
     })
     .filter((x): x is { id: string; url: string; alt: string } => x != null);
 
@@ -96,7 +98,7 @@ export default async function Site2GalleryPage() {
                 className="mt-4 border-primary bg-transparent hover:bg-primary/10"
                 asChild
               >
-                <Link href="/home-2/contact">
+                <Link href="/contact">
                   Contact us
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
                 </Link>
@@ -124,4 +126,3 @@ export default async function Site2GalleryPage() {
     </main>
   );
 }
-

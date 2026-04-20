@@ -8,13 +8,18 @@ export type LogoProps = {
    * `dark`: force dark mark for light backgrounds (useful when the source image is white)
    */
   variant?: "default" | "dark";
+  image?: string;
 };
 
-export default function Logo({ className, variant = "default" }: LogoProps) {
+export default function Logo({
+  className,
+  variant = "default",
+  image,
+}: LogoProps) {
   return (
     <div className={className}>
       <Image
-        src="/full-logo-dark.png"
+        src={image || "/full-logo-dark.png"}
         alt="Sunrise Apartments"
         className={cn(
           "h-14 w-auto sm:h-16",

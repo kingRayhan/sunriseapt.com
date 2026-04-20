@@ -1,137 +1,120 @@
-import Link from "next/link";
-import { Calendar, ArrowLeft, User } from "lucide-react";
-import type { Metadata } from "next";
+import Markdown from "@/components/shared/Markdown";
+import PageHero from "@/components/site-2/PageHero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getPostBySlug } from "@/drizzle/queries/blog";
-import {
-  DEFAULT_DESCRIPTION,
-  getSiteUrl,
-  truncateMetaDescription,
-} from "@/lib/seo";
+import { SITE_NAME } from "@/lib/seo";
 import { getCdnImageUrl } from "@/lib/utils";
+import { ArrowLeft, Calendar, User } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-interface Props {
+type Props = {
   params: Promise<{ id: string }>;
+};
+
+function formatDate(value: Date | string): string {
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-export async function generateMetadata({
-  params,
-}: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const post = await getPostBySlug(id);
-  if (!post) {
-    return {
-      title: "Post not found",
-      robots: { index: false, follow: true },
-    };
-  }
+  if (!post) return { title: `Post | ${SITE_NAME}`, robots: { index: false } };
 
-  const path = `/blog/${post.slug}`;
-  const description = truncateMetaDescription(
-    post.excerpt ?? post.content,
-    160,
-    DEFAULT_DESCRIPTION,
-  );
-  const absoluteImage =
-    getCdnImageUrl(post.imageKey ?? "") ?? `${getSiteUrl()}/full-logo.png`;
-
-  const published = new Date(String(post.date)).toISOString();
-
+  const img = post.imageKey ? getCdnImageUrl(post.imageKey) : null;
   return {
     title: post.title,
-    description,
-    alternates: { canonical: path },
-    openGraph: {
-      type: "article",
-      url: path,
-      title: post.title,
-      description,
-      publishedTime: published,
-      ...(post.author ? { authors: [post.author] } : {}),
-      images: [{ url: absoluteImage, alt: post.title }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description,
-      images: [absoluteImage],
-    },
+    description: post.excerpt ?? `Blog post by ${SITE_NAME}.`,
+    openGraph: img ? { images: [{ url: img, alt: post.title }] } : undefined,
   };
 }
 
 export const revalidate = 60;
 
-export default async function BlogPostPage({ params }: Props) {
+export default async function Site2BlogPostPage({ params }: Props) {
   const { id } = await params;
   const post = await getPostBySlug(id);
+  if (!post) notFound();
 
-  if (!post) {
-    return (
-      <div className="pt-32 text-center">
-        <h1 className="text-2xl font-bold mb-4">Post Not Found</h1>
-        <Button asChild>
-          <Link href="/blog">Back to Blog</Link>
-        </Button>
-      </div>
-    );
-  }
+  const heroImg =
+    (post.imageKey ? getCdnImageUrl(post.imageKey) : null) ??
+    "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&q=80&w=2400";
 
   return (
-    <div className="pt-20 lg:pt-24">
-      <div className="container mx-auto px-4 lg:px-8 py-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/blog">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Blog
-          </Link>
-        </Button>
-      </div>
+    <main>
+      <PageHero
+        title="Blog"
+        backgroundImage={heroImg}
+        imageAlt={post.title}
+        minHeightClassName="min-h-[min(45vh,520px)]"
+      />
 
-      <article className="container mx-auto px-4 lg:px-8 pb-16 max-w-3xl">
-        <div className="aspect-video rounded-lg overflow-hidden mb-8">
-          {post.imageKey && getCdnImageUrl(post.imageKey) && (
-            <img
-              src={getCdnImageUrl(post.imageKey)!}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
-          )}
+      <section className="border-t border-border/60 bg-background py-10 lg:py-14">
+        <div className="container mx-auto px-4 lg:px-8">
+          <Button
+            variant="outline"
+            className="border-foreground/25 bg-transparent"
+            asChild
+          >
+            <Link href="/blog">
+              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden />
+              Back to blog
+            </Link>
+          </Button>
         </div>
+      </section>
 
-        <div className="flex items-center gap-3 mb-4">
-          <Badge variant="secondary">{post.category}</Badge>
-          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            {new Date(post.date).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </span>
-          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <User className="h-4 w-4" /> {post.author}
-          </span>
-        </div>
+      <article className="border-t border-border/60 bg-background py-16 lg:py-24">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="mx-auto max-w-3xl">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Post
+            </p>
+            <h1 className="text-balance text-3xl font-bold uppercase tracking-tight text-primary sm:text-4xl">
+              {post.title}
+            </h1>
 
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-6">
-          {post.title}
-        </h1>
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              {post.category ? (
+                <Badge variant="secondary">{post.category}</Badge>
+              ) : null}
+              <span className="inline-flex items-center gap-2">
+                <Calendar className="h-4 w-4" aria-hidden />
+                {formatDate(post.date)}
+              </span>
+              {post.author ? (
+                <span className="inline-flex items-center gap-2">
+                  <User className="h-4 w-4" aria-hidden />
+                  {post.author}
+                </span>
+              ) : null}
+            </div>
 
-        <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-          {post.content.split("\n\n").map((paragraph, i) => (
-            <p
-              key={i}
-              className="mb-4"
-              dangerouslySetInnerHTML={{
-                __html: paragraph.replace(
-                  /\*\*(.*?)\*\*/g,
-                  '<strong class="text-foreground">$1</strong>',
-                ),
-              }}
-            />
-          ))}
+            {post.excerpt ? (
+              <p className="mt-8 text-pretty text-muted-foreground">
+                {post.excerpt}
+              </p>
+            ) : null}
+
+            {post.content ? (
+              <Markdown
+                content={post.content}
+                className="mt-10 text-muted-foreground"
+              />
+            ) : (
+              <p className="mt-10 text-sm text-muted-foreground">
+                No content provided.
+              </p>
+            )}
+          </div>
         </div>
       </article>
-    </div>
+    </main>
   );
 }

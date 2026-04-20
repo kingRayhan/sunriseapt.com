@@ -171,11 +171,11 @@ export default function TestimonialsCarousel({
                   ) : (
                     <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center text-white">
                       <p className="text-pretty text-sm text-white/90">
-                        Add a valid YouTube URL to this testimonial to play video
-                        here.
+                        Add a valid YouTube URL to this testimonial to play
+                        video here.
                       </p>
                       <Button variant="secondary" asChild>
-                        <Link href="/home-2/contact">Contact us</Link>
+                        <Link href="/contact">Contact us</Link>
                       </Button>
                     </div>
                   )}
@@ -253,4 +253,3 @@ export default function TestimonialsCarousel({
     </section>
   );
 }
-

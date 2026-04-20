@@ -1,6 +1,6 @@
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 const SIDE_IMAGE = "/images/property2.jpeg";
 
@@ -40,7 +40,7 @@ export default function AboutWhoWeAre() {
               className="mt-8 border-primary bg-transparent hover:bg-primary/10"
               asChild
             >
-              <Link href="/home-2/contact">Read more</Link>
+              <Link href="/contact">Read more</Link>
             </Button>
           </div>
 

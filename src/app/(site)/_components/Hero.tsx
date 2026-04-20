@@ -66,15 +66,20 @@ export type HeroSlide = {
 };
 
 export default function Hero({ slides }: { slides?: HeroSlide[] }) {
-  const SLIDES = (slides && slides.length > 0 ? slides : FALLBACK_SLIDES) as readonly HeroSlide[];
+  const SLIDES = (
+    slides && slides.length > 0 ? slides : FALLBACK_SLIDES
+  ) as readonly HeroSlide[];
   const slidesLen = SLIDES.length;
   const [index, setIndex] = useState(0);
   const [tabVisible, setTabVisible] = useState(true);
   const reducedMotion = usePrefersReducedMotion();
 
-  const goTo = useCallback((i: number) => {
-    setIndex(((i % slidesLen) + slidesLen) % slidesLen);
-  }, [slidesLen]);
+  const goTo = useCallback(
+    (i: number) => {
+      setIndex(((i % slidesLen) + slidesLen) % slidesLen);
+    },
+    [slidesLen],
+  );
 
   useEffect(() => {
     const onVis = () => setTabVisible(!document.hidden);
@@ -139,7 +144,7 @@ export default function Hero({ slides }: { slides?: HeroSlide[] }) {
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-32 pt-8 text-center sm:pb-36">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-32 pt-24 text-center sm:pb-36 sm:pt-28">
         <h1 className="max-w-4xl text-balance text-3xl font-bold uppercase sm:text-4xl md:text-5xl lg:text-6xl">
           {SLIDES[index]?.title}
         </h1>
@@ -201,7 +206,7 @@ export default function Hero({ slides }: { slides?: HeroSlide[] }) {
 
       <footer className="relative z-30 mt-auto flex flex-col gap-4 border-t border-white/10 bg-black px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
         <Link
-          href="/home-2#projects"
+          href="/#projects"
           className="flex items-center gap-2 text-sm font-medium uppercase transition-opacity duration-200 ease-out hover:opacity-90"
         >
           <Building2 className="size-5 shrink-0" aria-hidden />
