@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-const SIDE_IMAGE =
-  "https://images.unsplash.com/photo-1600566753190-17f0bdf2cb6a?auto=format&fit=crop&q=80&w=1400";
+const SIDE_IMAGE = "/images/property2.jpeg";
 
 export default function AboutWhoWeAre() {
   return (
@@ -26,21 +26,22 @@ export default function AboutWhoWeAre() {
               <p>
                 <strong className="text-foreground">Sunrise Apartments</strong>{" "}
                 has grown from a focused residential developer into a team known
-                for thoughtful layouts, dependable delivery, and places people are
-                proud to call home.
+                for thoughtful layouts, dependable delivery, and places people
+                are proud to call home.
               </p>
               <p>
                 We pair architectural clarity with sustainable choices so each
-                project reflects both its neighborhood and the way families want to
-                live today—from concept through handover and long after.
+                project reflects both its neighborhood and the way families want
+                to live today—from concept through handover and long after.
               </p>
             </div>
-            <Link
-              href="/contact"
-              className="mt-8 inline-flex border border-primary px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
+            <Button
+              variant="outline"
+              className="mt-8 border-primary bg-transparent hover:bg-primary/10"
+              asChild
             >
-              Read more
-            </Link>
+              <Link href="/home-2/contact">Read more</Link>
+            </Button>
           </div>
 
           <div className="relative aspect-4/3 w-full overflow-hidden rounded-lg border border-border/60 bg-muted shadow-sm lg:aspect-[5/4]">

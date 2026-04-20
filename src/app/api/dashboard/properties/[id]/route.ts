@@ -94,6 +94,10 @@ const patchBodySchema = z
       (v) => (v === undefined ? undefined : Boolean(v)),
       z.boolean().optional(),
     ),
+    published: z.preprocess(
+      (v) => (v === undefined ? undefined : Boolean(v)),
+      z.boolean().optional(),
+    ),
     images: stringArraySchema,
     features: stringArraySchema,
     projectDetails: z.preprocess(

@@ -1,6 +1,6 @@
 {
-  "id": "e3979d46-33cf-4fca-bd77-e419019ec23b",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "ec0fe225-704c-49d7-b5d1-69773d09a6f6",
+  "prevId": "e3979d46-33cf-4fca-bd77-e419019ec23b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -251,6 +251,12 @@
         },
         "description": {
           "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "short_description": {
+          "name": "short_description",
           "type": "text",
           "primaryKey": false,
           "notNull": false

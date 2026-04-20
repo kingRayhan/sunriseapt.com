@@ -3,7 +3,13 @@
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
 
 export type FeaturedProjectCard = {
   id: string;
@@ -104,7 +110,7 @@ function ProjectSlide({
             <p
               className={cn(
                 "text-pretty pt-4 text-sm leading-relaxed text-white/95 sm:text-[0.9375rem] sm:leading-relaxed",
-                "max-h-0 translate-y-2 overflow-hidden opacity-0",
+                "max-h-0 translate-y-2 overflow-hidden opacity-0 line-clamp-2",
                 "transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none",
                 "group-hover:max-h-72 group-hover:translate-y-0 group-hover:opacity-100",
                 "group-focus-within:max-h-72 group-focus-within:translate-y-0 group-focus-within:opacity-100",
@@ -200,8 +206,7 @@ export default function FeaturedProjectsCarousel({
       if (!el || projects.length === 0) return;
 
       const firstCard = el.querySelector<HTMLElement>("[data-carousel-card]");
-      const gapPx =
-        Number.parseFloat(getComputedStyle(el).gap) || CARD_GAP_PX;
+      const gapPx = Number.parseFloat(getComputedStyle(el).gap) || CARD_GAP_PX;
       const step = (firstCard?.offsetWidth ?? 380) + gapPx;
       const behavior: ScrollBehavior = reducedMotionRef.current
         ? "auto"
@@ -234,7 +239,7 @@ export default function FeaturedProjectsCarousel({
         <div className="flex shrink-0 justify-end gap-3 sm:pb-1">
           <button
             type="button"
-            className="inline-flex size-12 items-center justify-center rounded-full border border-foreground/80 text-foreground hover:opacity-80 motion-reduce:transition-none"
+            className="inline-flex size-12 items-center justify-center rounded-sm border border-foreground/80 text-foreground hover:opacity-80 motion-reduce:transition-none"
             aria-label="Previous projects"
             onClick={() => scrollByCards(-1)}
           >
@@ -242,7 +247,7 @@ export default function FeaturedProjectsCarousel({
           </button>
           <button
             type="button"
-            className="inline-flex size-12 items-center justify-center rounded-full border border-foreground/80 text-foreground hover:opacity-80 motion-reduce:transition-none"
+            className="inline-flex size-12 items-center justify-center rounded-sm border border-foreground/80 text-foreground hover:opacity-80 motion-reduce:transition-none"
             aria-label="Next projects"
             onClick={() => scrollByCards(1)}
           >

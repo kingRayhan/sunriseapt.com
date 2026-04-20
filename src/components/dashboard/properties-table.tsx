@@ -61,6 +61,7 @@ export function PropertiesTable({ properties }: PropertiesTableProps) {
             <TableHead>Title</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Visibility</TableHead>
             <TableHead>Address</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -68,7 +69,7 @@ export function PropertiesTable({ properties }: PropertiesTableProps) {
         <TableBody>
           {properties.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                 No properties yet. Create one to get started.
               </TableCell>
             </TableRow>
@@ -84,6 +85,11 @@ export function PropertiesTable({ properties }: PropertiesTableProps) {
                 <TableCell>
                   <Badge variant={p.status === "available" ? "default" : "outline"} className="capitalize">
                     {p.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={p.published ? "default" : "secondary"}>
+                    {p.published ? "Published" : "Hidden"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground max-w-[200px] truncate">

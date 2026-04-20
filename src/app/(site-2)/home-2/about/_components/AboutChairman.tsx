@@ -1,7 +1,8 @@
 import Image from "next/image";
 
-const PORTRAIT =
-  "https://images.unsplash.com/photo-1560250097-190b87022188?auto=format&fit=crop&q=80&w=900";
+const CHAIRMAN_PORTRAIT = "/images/chairman.png";
+const CHAIRMAN_NAME = "Mohammad Mostafa Zaman";
+const CHAIRMAN_DESIGNATION = "Chairman";
 
 export default function AboutChairman() {
   return (
@@ -28,23 +29,31 @@ export default function AboutChairman() {
                 after-sales care across every project we deliver.
               </p>
               <p>
-                We listen closely to buyers and partners, invest in detail where it
-                matters most, and treat every handover as the beginning of a long-term
-                relationship—not the end of a transaction.
+                We listen closely to buyers and partners, invest in detail where
+                it matters most, and treat every handover as the beginning of a
+                long-term relationship—not the end of a transaction.
+              </p>
+            </div>
+
+            <div className="mt-8">
+              <p className="text-base font-semibold text-foreground sm:text-lg">
+                {CHAIRMAN_NAME}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {CHAIRMAN_DESIGNATION}, Sunrise Apartments Ltd.
               </p>
             </div>
           </div>
 
           <div className="order-1 justify-self-center lg:order-2 lg:justify-self-end">
-            <div className="relative aspect-3/4 w-full max-w-md overflow-hidden rounded-lg border border-border/60 bg-muted shadow-md">
-              <Image
-                src={PORTRAIT}
-                alt="Chairman portrait"
-                fill
-                className="object-cover object-top"
-                sizes="(max-width: 1024px) 100vw, 480px"
-              />
-            </div>
+            <Image
+              src={CHAIRMAN_PORTRAIT}
+              alt={`${CHAIRMAN_NAME}, ${CHAIRMAN_DESIGNATION}`}
+              className="size-full object-cover object-top"
+              loading="lazy"
+              width={500}
+              height={500}
+            />
           </div>
         </div>
       </div>

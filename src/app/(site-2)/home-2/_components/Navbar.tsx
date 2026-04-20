@@ -25,48 +25,58 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b backdrop-blur-sm",
+        "z-50 w-full",
+        isHome ? "absolute inset-x-0 top-0" : "sticky top-0",
         isHome
-          ? "border-white/10 bg-black/50 text-white"
-          : "border-border bg-background/95 text-foreground",
+          ? "border-b border-white/10 bg-black/30 text-white"
+          : "border-b border-border bg-background text-foreground",
       )}
     >
-      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
-        <Link href="/home-2" className="shrink-0 text-sm font-semibold uppercase sm:text-base">
+      <div className="container mx-auto flex items-center gap-4 px-4 py-3 lg:px-8">
+        <Link href="/home-2" className="shrink-0" aria-label="Go to home">
           {isHome ? <LogoLight /> : <Logo />}
         </Link>
 
         <nav
-          className="absolute left-1/2 hidden -translate-x-1/2 lg:block"
+          className="hidden flex-1 justify-center lg:flex"
           aria-label="Primary"
         >
-          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm">
-            {SITE_2_NAV_LINKS.map((item) => (
-              <li key={item.href + item.label}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "transition-opacity duration-200 ease-out hover:opacity-100",
-                    isHome ? "opacity-90" : "text-foreground/80 hover:text-foreground",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+          <ul className="flex items-center gap-7 text-sm">
+            {SITE_2_NAV_LINKS.map((item) => {
+              const active =
+                item.href === "/home-2"
+                  ? pathname === "/home-2"
+                  : pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`);
+
+              return (
+                <li key={item.href + item.label}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "rounded-sm px-2 py-1 text-xs font-medium transition-colors duration-200 ease-out",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <Link
-            href="/contact"
+            href="/home-2/contact"
             className={cn(
-              "hidden items-center gap-2 border px-3 py-1.5 text-sm transition-opacity duration-200 ease-out hover:opacity-90 sm:flex",
-              isHome ? "border-white/70" : "border-border",
+              "hidden items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-medium transition-opacity duration-200 ease-out hover:opacity-90 sm:flex",
+              isHome
+                ? "border-white/70 bg-white/5 text-white"
+                : "border-border text-foreground",
             )}
           >
             <Phone className="size-4" aria-hidden />
-            <span>Call us</span>
+            <span>Contact us</span>
           </Link>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -75,7 +85,10 @@ export default function Navbar() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className={cn("lg:hidden", isHome && "text-white hover:bg-white/10")}
+                className={cn(
+                  "lg:hidden",
+                  isHome && "text-white hover:bg-white/10",
+                )}
                 aria-label="Open menu"
               >
                 <Menu className="size-5" aria-hidden />
@@ -97,11 +110,11 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <Link
-                  href="/contact"
+                  href="/home-2/contact"
                   onClick={() => setOpen(false)}
                   className="text-base font-medium"
                 >
-                  Call us
+                  Contact us
                 </Link>
               </nav>
             </SheetContent>

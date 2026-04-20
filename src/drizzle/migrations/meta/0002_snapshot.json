@@ -1,6 +1,6 @@
 {
-  "id": "e3979d46-33cf-4fca-bd77-e419019ec23b",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "72b3b8ae-d628-4f58-82a4-8736db0d3040",
+  "prevId": "ec0fe225-704c-49d7-b5d1-69773d09a6f6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -255,6 +255,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "short_description": {
+          "name": "short_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "price": {
           "name": "price",
           "type": "numeric(14, 2)",
@@ -275,6 +281,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'available'"
+        },
+        "published": {
+          "name": "published",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
         },
         "bedrooms": {
           "name": "bedrooms",

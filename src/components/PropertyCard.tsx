@@ -29,10 +29,18 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         <CardContent className="p-5">
           <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
             {property.title}
+            {property.location ? (
+              <span className="font-normal text-muted-foreground">
+                {" "}
+                — {property.location}
+              </span>
+            ) : null}
           </h3>
-          <p className="text-sm text-muted-foreground mb-3">
-            {property.location}
-          </p>
+          {property.address ? (
+            <p className="text-sm text-muted-foreground mb-3 truncate">
+              {property.address}
+            </p>
+          ) : null}
           <div className="flex items-center gap-4 text-sm text-muted-foreground border-t border-border pt-3">
             <span className="flex items-center gap-1.5">
               <Bed className="h-4 w-4" /> {property.bedrooms} Beds

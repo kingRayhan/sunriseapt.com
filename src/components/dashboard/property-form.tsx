@@ -55,6 +55,7 @@ function slugify(s: string): string {
 const propertyFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
+  location: z.string().optional(),
   description: z.string().optional(),
   price: z.string().optional(),
   type: z.string().optional(),
@@ -67,6 +68,7 @@ const propertyFormSchema = z.object({
   lat: z.number().optional(),
   lng: z.number().optional(),
   featured: z.boolean().optional(),
+  published: z.boolean().optional(),
   imagesStr: z.string().optional(),
   featuresStr: z.string().optional(),
   brochureKey: z.string().optional(),
@@ -97,10 +99,34 @@ const PROJECT_DETAIL_FIELDS = [
 
 type PropertyFormValues = z.infer<typeof propertyFormSchema>;
 
+const DHAKA_AREAS = [
+  "Uttara",
+  "Dhanmondi",
+  "Banani",
+  "Gulshan",
+  "Bashundhara",
+  "Mirpur",
+  "Mohammadpur",
+  "Badda",
+  "Khilgaon",
+  "Malibagh",
+  "Rampura",
+  "Tejgaon",
+  "Motijheel",
+  "Old Dhaka",
+  "Pallabi",
+  "Kafrul",
+  "Baridhara",
+  "Niketon",
+  "Khilkhet",
+  "Airport",
+] as const;
+
 function getDefaultValues(property?: Property | null): PropertyFormValues {
   return {
     title: property?.title ?? "",
     slug: property?.slug ?? "",
+    location: property?.location ?? "",
     description: property?.description ?? "",
     price: property?.price ?? "0",
     type: property?.type ?? "apartment",
@@ -113,6 +139,7 @@ function getDefaultValues(property?: Property | null): PropertyFormValues {
     lat: property?.lat ?? undefined,
     lng: property?.lng ?? undefined,
     featured: property?.featured ?? false,
+    published: property?.published ?? true,
     imagesStr: Array.isArray(property?.images)
       ? property.images.join(", ")
       : "",
@@ -176,6 +203,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
       const body = {
         title: values.title.trim(),
         slug: values.slug.trim() || slugify(values.title),
+        location: values.location?.trim() || null,
         description: values.description?.trim() || null,
         price: values.price?.trim() || "0",
         type: values.type?.trim() || "apartment",
@@ -196,6 +224,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             ? values.lng
             : undefined,
         featured: values.featured ?? false,
+        published: values.published ?? true,
         images: (values.imagesStr ?? "")
           .split(",")
           .map((s) => s.trim())
@@ -328,7 +357,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
       onSubmit={onSubmit}
       className="flex min-h-[calc(100vh-var(--header-height,5rem))] flex-col"
     >
-      <div className="flex-1 space-y-8 pb-24">
+      <div className="flex-1 space-y-8 pb-[calc(var(--header-height,5rem)+6rem+env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button type="button" variant="ghost" size="icon" asChild>
@@ -408,6 +437,64 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 )}
               />
             </div>
+            <Controller
+              name="location"
+              control={form.control}
+              render={({ field, fieldState }) => {
+                const presetMatch = DHAKA_AREAS.includes(
+                  (field.value ?? "").trim() as (typeof DHAKA_AREAS)[number],
+                );
+                const selectValue =
+                  field.value && presetMatch ? field.value : "__other__";
+
+                return (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="property-form-location">
+                      Area (Dhaka)
+                    </FieldLabel>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Select
+                        value={selectValue}
+                        onValueChange={(v) => {
+                          if (v === "__other__") {
+                            if (presetMatch) field.onChange("");
+                            return;
+                          }
+                          field.onChange(v);
+                        }}
+                        disabled={saving}
+                      >
+                        <SelectTrigger id="property-form-location">
+                          <SelectValue placeholder="Select area" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DHAKA_AREAS.map((a) => (
+                            <SelectItem key={a} value={a}>
+                              {a}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="__other__">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Input
+                        value={presetMatch ? "" : (field.value ?? "")}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        disabled={saving || presetMatch}
+                        placeholder="Other area (type here)"
+                        aria-invalid={fieldState.invalid}
+                      />
+                    </div>
+                    <FieldDescription>
+                      Used on the website listing cards (e.g. “Uttara”, “Banani”).
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
             <Controller
               name="description"
               control={form.control}
@@ -546,6 +633,29 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       />
                       <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                         Show on homepage
+                      </label>
+                    </div>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="published"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Published</FieldLabel>
+                    <div className="flex h-10 items-center pt-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <label className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Show on website
                       </label>
                     </div>
                     {fieldState.invalid && (
@@ -945,7 +1055,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
         </Card>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 py-4 backdrop-blur supports-backdrop-filter:bg-background/80">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur supports-backdrop-filter:bg-background/80">
         <div className="container flex flex-wrap items-center justify-end gap-4 px-4 md:px-8">
           <Button type="button" variant="outline" asChild>
             <Link href="/dashboard/properties">Cancel</Link>

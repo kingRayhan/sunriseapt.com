@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 export type TeamCarouselMember = {
   id: string;
@@ -76,7 +77,7 @@ export default function TeamCarousel({
           <div className="flex shrink-0 justify-end gap-2">
             <button
               type="button"
-              className="inline-flex size-11 items-center justify-center rounded-full border border-foreground/80 text-foreground hover:opacity-80"
+              className="inline-flex size-11 items-center justify-center rounded-sm border border-foreground/80 text-foreground hover:opacity-80"
               aria-label="Previous team members"
               onClick={() => scrollBy(-1)}
             >
@@ -84,7 +85,7 @@ export default function TeamCarousel({
             </button>
             <button
               type="button"
-              className="inline-flex size-11 items-center justify-center rounded-full border border-foreground/80 text-foreground hover:opacity-80"
+              className="inline-flex size-11 items-center justify-center rounded-sm border border-foreground/80 text-foreground hover:opacity-80"
               aria-label="Next team members"
               onClick={() => scrollBy(1)}
             >
@@ -134,12 +135,13 @@ export default function TeamCarousel({
 
         {moreHref ? (
           <div className="mt-10">
-            <Link
-              href={moreHref}
-              className="inline-flex border border-primary px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
+            <Button
+              variant="outline"
+              className="border-primary bg-transparent hover:bg-primary/10"
+              asChild
             >
-              {moreLabel}
-            </Link>
+              <Link href={moreHref}>{moreLabel}</Link>
+            </Button>
           </div>
         ) : null}
       </div>

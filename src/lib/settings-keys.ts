@@ -38,7 +38,10 @@ export const SETTING_KEYS = {
 export type HomeSliderSlide = {
   imageKey: string;
   title?: string;
-  subtitle?: string;
+  /** For site-2 hero: short description under the heading. */
+  description?: string;
+  /** Accessibility: describe the image when it conveys meaning. */
+  alt?: string;
   link?: string;
 };
 

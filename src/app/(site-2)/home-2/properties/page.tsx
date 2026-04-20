@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/site-2/PageHero";
+import { Button } from "@/components/ui/button";
 import { getProperties } from "@/drizzle/queries/properties";
 import { getCdnImageUrl } from "@/lib/utils";
 import { SITE_NAME } from "@/lib/seo";
@@ -62,13 +63,16 @@ export default async function Site2ProjectsPage() {
               <p className="text-sm text-muted-foreground">
                 No projects are available right now.
               </p>
-              <Link
-                href="/home-2/contact"
-                className="mt-4 inline-flex items-center justify-center border border-primary px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
+              <Button
+                variant="outline"
+                className="mt-4 border-primary bg-transparent hover:bg-primary/10"
+                asChild
               >
-                Contact us
-                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-              </Link>
+                <Link href="/home-2/contact">
+                  Contact us
+                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                </Link>
+              </Button>
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

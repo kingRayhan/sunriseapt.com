@@ -8,27 +8,30 @@ import { useCallback, useEffect, useState } from "react";
 
 const AUTO_MS = 6000;
 
-const SLIDES = [
+const FALLBACK_SLIDES = [
   {
     id: "1",
     title: "Redefining happiness",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2400",
+    image: "/images/property3.png",
     alt: "Aerial view of a luxury residential property with pool and gardens",
+    description:
+      "A refined residential experience shaped by thoughtful planning, open green space, and the comfort of modern amenities—built for everyday ease and long‑term value.",
   },
   {
     id: "2",
     title: "Where luxury meets nature",
-    image:
-      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=2400",
+    image: "/images/property1.jpeg",
     alt: "Modern architecture with swimming pool at dusk",
+    description:
+      "Contemporary architecture balanced with natural light and calm surroundings—so your home feels private, peaceful, and connected to the city when you need it.",
   },
   {
     id: "3",
     title: "Spaces designed for living",
-    image:
-      "https://images.unsplash.com/photo-1600566753190-17f0bdf2cb6a?auto=format&fit=crop&q=80&w=2400",
+    image: "/images/property2.jpeg",
     alt: "Contemporary high-rise residential towers",
+    description:
+      "Smart layouts, quality finishes, and dependable delivery—crafted for families who want functional spaces today and a home they’ll be proud of tomorrow.",
   },
 ] as const;
 
@@ -53,14 +56,25 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-export default function Hero() {
+export type HeroSlide = {
+  id: string;
+  title: string;
+  image: string;
+  alt: string;
+  description: string;
+  link?: string;
+};
+
+export default function Hero({ slides }: { slides?: HeroSlide[] }) {
+  const SLIDES = (slides && slides.length > 0 ? slides : FALLBACK_SLIDES) as readonly HeroSlide[];
+  const slidesLen = SLIDES.length;
   const [index, setIndex] = useState(0);
   const [tabVisible, setTabVisible] = useState(true);
   const reducedMotion = usePrefersReducedMotion();
 
   const goTo = useCallback((i: number) => {
-    setIndex(((i % SLIDES.length) + SLIDES.length) % SLIDES.length);
-  }, []);
+    setIndex(((i % slidesLen) + slidesLen) % slidesLen);
+  }, [slidesLen]);
 
   useEffect(() => {
     const onVis = () => setTabVisible(!document.hidden);
@@ -73,11 +87,11 @@ export default function Hero() {
     if (reducedMotion || !tabVisible) return;
 
     const id = window.setInterval(() => {
-      setIndex((prev) => (prev + 1) % SLIDES.length);
+      setIndex((prev) => (prev + 1) % slidesLen);
     }, AUTO_MS);
 
     return () => window.clearInterval(id);
-  }, [reducedMotion, tabVisible]);
+  }, [reducedMotion, tabVisible, slidesLen]);
 
   const whatsappDigits = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(
     /\D/g,
@@ -129,6 +143,9 @@ export default function Hero() {
         <h1 className="max-w-4xl text-balance text-3xl font-bold uppercase sm:text-4xl md:text-5xl lg:text-6xl">
           {SLIDES[index]?.title}
         </h1>
+        <p className="mt-4 max-w-3xl text-pretty text-base leading-relaxed text-white/85 sm:text-lg">
+          {SLIDES[index]?.description}
+        </p>
       </div>
 
       <div

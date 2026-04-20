@@ -1,8 +1,9 @@
 import LogoLight from "@/components/shared/LogoLight";
+import Image from "next/image";
 import Link from "next/link";
 
 /** Footer backdrop (served from /public). */
-const FOOTER_BG_IMAGE = "/power-plant-construction_1127-2891.avif";
+const FOOTER_BG_IMAGE = "/images/property3.png";
 
 const TAGLINE =
   "Your trusted partner in finding the perfect property. We bring expertise, integrity, and personalized service to every transaction.";
@@ -26,10 +27,13 @@ export default function Footer() {
 
   return (
     <footer className="relative isolate min-h-[min(52vh,520px)] overflow-hidden text-white">
-      <img
+      <Image
         src={FOOTER_BG_IMAGE}
-        alt=""
-        className="absolute inset-0 size-full object-cover object-center"
+        alt="Footer background image"
+        fill
+        className="absolute inset-0 size-full object-cover object-top"
+        sizes="(max-width: 100%) 100vw"
+        priority={false}
       />
       <div
         className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.78)_55%,rgba(0,0,0,0.82)_100%)]"

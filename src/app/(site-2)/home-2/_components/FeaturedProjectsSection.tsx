@@ -1,4 +1,4 @@
-import { getAllProperties } from "@/drizzle/queries/properties";
+import { getFeaturedProperties } from "@/drizzle/queries/properties";
 import { getCdnImageUrl } from "@/lib/utils";
 import FeaturedProjectsCarousel from "./FeaturedProjectsCarousel";
 
@@ -14,8 +14,8 @@ function excerptFromDescription(text: string | null, max = 240): string {
 }
 
 export default async function FeaturedProjectsSection() {
-  const rows = await getAllProperties();
-  const projects = rows.slice(0, 16).map((p) => ({
+  const featuredProperties = await getFeaturedProperties();
+  const projects = featuredProperties.slice(0, 16).map((p) => ({
     id: p.id,
     slug: p.slug,
     title: p.title,

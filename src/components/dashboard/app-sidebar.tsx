@@ -7,6 +7,7 @@ import {
   ExternalLinkIcon,
   FileTextIcon,
   LayoutDashboardIcon,
+  MessageSquareQuoteIcon,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
@@ -23,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 const data = {
   navMain: [
@@ -35,6 +37,11 @@ const data = {
       icon: ClipboardListIcon,
     },
     { title: "Team", url: "/dashboard/team", icon: UsersIcon },
+    {
+      title: "Testimonials",
+      url: "/dashboard/testimonials",
+      icon: MessageSquareQuoteIcon,
+    },
     { title: "Gallery", url: "/dashboard/gallery", icon: CameraIcon },
   ],
   navSecondary: [
@@ -54,10 +61,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
+              className="data-[slot=sidebar-menu-button]:p-1.5! h-10 w-auto"
             >
               <Link href="/dashboard" className="flex items-center gap-2">
-                <img src="/full-logo.png" alt="" className="h-6 w-auto" />
+                <Image
+                  src="/full-logo-dark.png"
+                  alt="Sunrise Apartments"
+                  className="h-10 w-auto "
+                  width={100}
+                  height={100}
+                />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
