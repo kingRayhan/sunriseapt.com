@@ -3,9 +3,13 @@ import { getSiteSettings } from "@/drizzle/queries/settings";
 import { SETTING_KEYS } from "@/lib/settings-keys";
 import { SITE_NAME } from "@/lib/seo";
 import { ContactPageContent } from "./ContactPageContent";
+import PageHero from "@/components/site-2/PageHero";
 
 const description =
   "Contact Sunriseapt — phone, email, and address. Reach our team for property inquiries and support.";
+
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&q=80&w=2400";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -69,6 +73,14 @@ export default async function ContactPage() {
   } | null = hasValidLocation ? { lat, lng, address } : null;
 
   return (
-    <ContactPageContent contactInfo={contactInfo} mapLocation={mapLocation} />
+    <main>
+      <PageHero
+        title="Contact"
+        backgroundImage={HERO_IMAGE}
+        imageAlt="Bright modern interior"
+        minHeightClassName="min-h-[min(52vh,560px)]"
+      />
+      <ContactPageContent contactInfo={contactInfo} mapLocation={mapLocation} />
+    </main>
   );
 }

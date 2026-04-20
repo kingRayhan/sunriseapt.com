@@ -22,9 +22,11 @@ export const propertiesTable = pgTable("properties", {
   title: text("title").notNull(),
   slug: text("slug").unique().notNull(),
   description: text("description"),
+  shortDescription: text("short_description"),
   price: numeric("price", { precision: 14, scale: 2 }).notNull().default("0"),
   type: varchar("type", { length: 50 }).notNull().default("apartment"),
   status: varchar("status", { length: 50 }).notNull().default("available"),
+  published: boolean("published").notNull().default(true),
   bedrooms: smallint("bedrooms").notNull().default(0),
   bathrooms: smallint("bathrooms").notNull().default(0),
   area: varchar("area", { length: 50 }).notNull().default("0"),
@@ -108,6 +110,26 @@ export const galleryImagesTable = pgTable("gallery_images", {
     .defaultNow(),
 });
 
+export const testimonialsTable = pgTable("testimonials", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  shortDescription: text("short_description").notNull(),
+  authorName: text("author_name").notNull(),
+  authorTitle: text("author_title").notNull(),
+  projectBrand: text("project_brand").notNull(),
+  overlayLine: text("overlay_line"),
+  videoUrl: text("video_url").notNull(),
+  posterKey: text("poster_key").notNull(),
+  sortOrder: smallint("sort_order").notNull().default(0),
+  published: boolean("published").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const siteSettingsTable = pgTable("site_settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
@@ -130,5 +152,8 @@ export type NewContactInquiry = typeof contactInquiriesTable.$inferInsert;
 
 export type GalleryImage = typeof galleryImagesTable.$inferSelect;
 export type NewGalleryImage = typeof galleryImagesTable.$inferInsert;
+
+export type Testimonial = typeof testimonialsTable.$inferSelect;
+export type NewTestimonial = typeof testimonialsTable.$inferInsert;
 
 export type SiteSetting = typeof siteSettingsTable.$inferSelect;

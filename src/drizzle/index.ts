@@ -6,6 +6,7 @@ export {
   blogPostsTable,
   contactInquiriesTable,
   galleryImagesTable,
+  testimonialsTable,
   siteSettingsTable,
 } from "./schema";
 
@@ -20,6 +21,8 @@ export type {
   NewContactInquiry,
   GalleryImage,
   NewGalleryImage,
+  Testimonial,
+  NewTestimonial,
   SiteSetting,
   ProjectDetail,
 } from "./schema";

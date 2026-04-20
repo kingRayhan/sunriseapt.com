@@ -1,12 +1,11 @@
-import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/require-auth";
 import {
+  deleteProperty,
   getPropertyById,
   updateProperty,
-  deleteProperty,
 } from "@/drizzle/queries/properties";
 import type { NewProperty } from "@/drizzle/schema";
-import type { ProjectDetail } from "@/drizzle/schema";
+import { requireAuth } from "@/lib/require-auth";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 function slugify(s: string): string {
@@ -92,6 +91,10 @@ const patchBodySchema = z
     lat: floatSchema,
     lng: floatSchema,
     featured: z.preprocess(
+      (v) => (v === undefined ? undefined : Boolean(v)),
+      z.boolean().optional(),
+    ),
+    published: z.preprocess(
       (v) => (v === undefined ? undefined : Boolean(v)),
       z.boolean().optional(),
     ),

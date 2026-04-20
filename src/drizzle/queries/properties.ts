@@ -7,7 +7,12 @@ export async function getProperties() {
   return db
     .select()
     .from(propertiesTable)
-    .where(eq(propertiesTable.status, "available"))
+    .where(
+      and(
+        eq(propertiesTable.status, "available"),
+        eq(propertiesTable.published, true),
+      ),
+    )
     .orderBy(desc(propertiesTable.createdAt));
 }
 
@@ -36,6 +41,7 @@ export async function getFeaturedProperties() {
       and(
         eq(propertiesTable.featured, true),
         eq(propertiesTable.status, "available"),
+        eq(propertiesTable.published, true),
       ),
     )
     .orderBy(desc(propertiesTable.createdAt));
@@ -45,7 +51,7 @@ export async function getPropertyBySlug(slug: string) {
   const rows = await db
     .select()
     .from(propertiesTable)
-    .where(eq(propertiesTable.slug, slug))
+    .where(and(eq(propertiesTable.slug, slug), eq(propertiesTable.published, true)))
     .limit(1);
 
   return rows[0] ?? null;
@@ -64,6 +70,7 @@ export async function getRelatedProperties(
         eq(propertiesTable.type, type),
         ne(propertiesTable.id, currentId),
         eq(propertiesTable.status, "available"),
+        eq(propertiesTable.published, true),
       ),
     )
     .limit(limit);

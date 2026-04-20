@@ -43,8 +43,8 @@ CREATE TABLE "properties" (
 	"status" varchar(50) DEFAULT 'available' NOT NULL,
 	"bedrooms" smallint DEFAULT 0 NOT NULL,
 	"bathrooms" smallint DEFAULT 0 NOT NULL,
-	"area" numeric(10, 2) DEFAULT '0' NOT NULL,
-	"year_built" smallint,
+	"area" varchar(50) DEFAULT '0' NOT NULL,
+	"year_built" varchar(50),
 	"location" text,
 	"address" text,
 	"lat" double precision,
@@ -72,6 +72,22 @@ CREATE TABLE "team_members" (
 	"bio" text,
 	"image_key" text,
 	"sort_order" smallint DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "testimonials" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" text NOT NULL,
+	"short_description" text NOT NULL,
+	"author_name" text NOT NULL,
+	"author_title" text NOT NULL,
+	"project_brand" text NOT NULL,
+	"overlay_line" text,
+	"video_url" text NOT NULL,
+	"poster_key" text NOT NULL,
+	"sort_order" smallint DEFAULT 0 NOT NULL,
+	"published" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );

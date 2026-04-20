@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
+import { createProperty, getAllProperties } from "@/drizzle/queries/properties";
+import type { NewProperty, ProjectDetail } from "@/drizzle/schema";
 import { requireAuth } from "@/lib/require-auth";
-import { getAllProperties, createProperty } from "@/drizzle/queries/properties";
-import type { NewProperty } from "@/drizzle/schema";
-import type { ProjectDetail } from "@/drizzle/schema";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 function slugify(s: string): string {
@@ -93,6 +92,7 @@ const createBodySchema = z
     lat: floatSchema.optional(),
     lng: floatSchema.optional(),
     featured: z.preprocess((v) => Boolean(v), z.boolean()).optional(),
+    published: z.preprocess((v) => (v === undefined ? undefined : Boolean(v)), z.boolean().optional()),
     images: stringArraySchema.optional(),
     features: stringArraySchema.optional(),
     projectDetails: z.array(projectDetailSchema).optional(),
@@ -130,6 +130,7 @@ function parseBody(body: unknown): NewProperty {
     price,
     type: parsed.type ?? "apartment",
     status: parsed.status ?? "available",
+    published: parsed.published ?? true,
     bedrooms,
     bathrooms,
     area,

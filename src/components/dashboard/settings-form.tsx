@@ -581,6 +581,26 @@ export function SettingsForm({ initialSettings }: { initialSettings: SettingsMap
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label>Alt text</Label>
+                      <Input
+                        placeholder="Describe the image (for accessibility)"
+                        value={slide.alt ?? ""}
+                        onChange={(e) => updateSlide(index, "alt", e.target.value)}
+                        disabled={saving}
+                      />
+                    </div>
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label>Description</Label>
+                      <Input
+                        placeholder="Short description shown under the heading"
+                        value={slide.description ?? ""}
+                        onChange={(e) =>
+                          updateSlide(index, "description", e.target.value)
+                        }
+                        disabled={saving}
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <Label>Link URL</Label>
                       <Input
                         type="url"

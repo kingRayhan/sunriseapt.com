@@ -1,72 +1,54 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { SupportChatPopup } from "@/components/SupportChatPopup";
-import { getSiteSettings } from "@/drizzle/queries/settings";
-import { SETTING_KEYS } from "@/lib/settings-keys";
+import { DEFAULT_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/seo";
+import type { Metadata } from "next";
+import "../globals.css";
+import Footer from "./_components/Footer";
+import Navbar from "./_components/Navbar";
 
-// Force static generation + ISR for all public site pages (not dashboard)
-export const dynamic = "force-static";
-export const revalidate = 60;
+const defaultTitle = `${SITE_NAME} - Premium Real Estate`;
 
-export default async function SiteLayout({
+export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: defaultTitle,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: DEFAULT_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: SITE_NAME,
+    title: defaultTitle,
+    description: DEFAULT_DESCRIPTION,
+    images: [{ url: "/full-logo.png", alt: `${SITE_NAME} logo` }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/full-logo.png"],
+  },
+  icons: {
+    icon: [{ url: "/favicon.ico" }, { url: "/favicon.png", type: "image/png" }],
+    apple: "/favicon.png",
+  },
+};
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSiteSettings();
-  const messengerLink = settings[SETTING_KEYS.messenger_link] ?? null;
-  const whatsappNumber = settings[SETTING_KEYS.whatsapp_number] ?? null;
-  const socialLinks = {
-    facebook: settings[SETTING_KEYS.social_facebook]?.trim() || null,
-    twitter: settings[SETTING_KEYS.social_twitter]?.trim() || null,
-    instagram: settings[SETTING_KEYS.social_instagram]?.trim() || null,
-    linkedin: settings[SETTING_KEYS.social_linkedin]?.trim() || null,
-    youtube: settings[SETTING_KEYS.social_youtube]?.trim() || null,
-  };
-
-  const contactPhonesRaw = settings[SETTING_KEYS.contact_phones]?.trim();
-  const contactEmailsRaw = settings[SETTING_KEYS.contact_emails]?.trim();
-  const contactPhones: string[] = contactPhonesRaw
-    ? (() => {
-        try {
-          const parsed = JSON.parse(contactPhonesRaw) as unknown;
-          return Array.isArray(parsed)
-            ? parsed.map((x) => String(x ?? "").trim()).filter(Boolean)
-            : [];
-        } catch {
-          return [];
-        }
-      })()
-    : [];
-  const contactEmails: string[] = contactEmailsRaw
-    ? (() => {
-        try {
-          const parsed = JSON.parse(contactEmailsRaw) as unknown;
-          return Array.isArray(parsed)
-            ? parsed.map((x) => String(x ?? "").trim()).filter(Boolean)
-            : [];
-        } catch {
-          return [];
-        }
-      })()
-    : [];
-
-  const contactInfo = {
-    companyName: settings[SETTING_KEYS.company_name]?.trim() || null,
-    address: settings[SETTING_KEYS.address]?.trim() || null,
-    phones: contactPhones,
-    emails: contactEmails,
-  };
-
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      {children}
-      <Footer socialLinks={socialLinks} contactInfo={contactInfo} />
-      <SupportChatPopup
-        messengerLink={messengerLink || undefined}
-        whatsappNumber={whatsappNumber || undefined}
-      />
-    </div>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <Navbar />
+        {children}
+        <Footer />
+      </body>
+    </html>
   );
 }

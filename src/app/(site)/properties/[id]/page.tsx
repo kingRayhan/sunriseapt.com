@@ -1,276 +1,287 @@
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import Link from "next/link";
-import {
-  Bed,
-  Bath,
-  Maximize,
-  Calendar,
-  MapPin,
-  ArrowLeft,
-  DownloadIcon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import PropertyCard from "@/components/PropertyCard";
 import PropertyImageGallery from "@/components/PropertyImageGallery";
-import dynamic from "next/dynamic";
+import Markdown from "@/components/shared/Markdown";
+import PageHero from "@/components/site-2/PageHero";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   getPropertyBySlug,
   getRelatedProperties,
 } from "@/drizzle/queries/properties";
-import {
-  DEFAULT_DESCRIPTION,
-  getSiteUrl,
-  truncateMetaDescription,
-} from "@/lib/seo";
+import { SITE_NAME } from "@/lib/seo";
 import { getCdnImageUrl } from "@/lib/utils";
-import MapClient from "./MapClient";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bath,
+  Bed,
+  DownloadIcon,
+  MapPin,
+  Maximize,
+} from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-interface Props {
+type Props = {
   params: Promise<{ id: string }>;
+};
+
+function formatArea(area: string | number): string {
+  const num = typeof area === "string" ? Number.parseFloat(area) : area;
+  if (!Number.isFinite(num)) return "";
+  return `${Math.round(num).toLocaleString("en-US")} sqft`;
 }
 
-export async function generateMetadata({
-  params,
-}: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const property = await getPropertyBySlug(id);
-  if (!property) notFound();
+  if (!property) return { title: `Project | ${SITE_NAME}` };
 
-  const path = `/properties/${property.slug}`;
-  const fromDescription = truncateMetaDescription(
-    property.description,
-    160,
-    "",
-  );
-  const fallbackBits = [property.title, property.address, property.location]
-    .filter(Boolean)
-    .join(". ");
-  const description =
-    fromDescription ||
-    truncateMetaDescription(fallbackBits, 160, DEFAULT_DESCRIPTION);
-
-  const firstKey = property.images[0];
-  const absoluteImage =
-    (firstKey ? getCdnImageUrl(firstKey) : null) ??
-    `${getSiteUrl()}/full-logo.png`;
+  const coverKey = property.images[0];
+  const coverUrl = coverKey ? getCdnImageUrl(coverKey) : null;
 
   return {
     title: property.title,
-    description,
-    alternates: { canonical: path },
-    openGraph: {
-      type: "website",
-      url: path,
-      title: property.title,
-      description,
-      images: [{ url: absoluteImage, alt: property.title }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: property.title,
-      description,
-      images: [absoluteImage],
-    },
+    description:
+      property.description?.slice(0, 160) ||
+      `Explore ${property.title} by ${SITE_NAME}.`,
+    openGraph: coverUrl
+      ? {
+          images: [{ url: coverUrl, alt: property.title }],
+        }
+      : undefined,
   };
 }
 
 export const revalidate = 60;
 
-export default async function PropertyDetailsPage({ params }: Props) {
+export default async function Site2ProjectDetailsPage({ params }: Props) {
   const { id } = await params;
   const property = await getPropertyBySlug(id);
-
   if (!property) notFound();
 
-  const propertyImageUrls = property.images
-    .map((key) => getCdnImageUrl(key))
-    .filter((url): url is string => url != null);
+  const heroImage =
+    (property.images[0] ? getCdnImageUrl(property.images[0]) : null) ??
+    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=2400";
 
-  const relatedProperties = await getRelatedProperties(
-    property.id,
-    property.type,
-    3,
-  );
+  const imageUrls = property.images
+    .map((k) => getCdnImageUrl(k))
+    .filter((u): u is string => u != null);
+
+  const related = await getRelatedProperties(property.id, property.type, 3);
 
   return (
-    <div className="pt-20 lg:pt-24">
-      <div className="container mx-auto px-4 lg:px-8 py-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/properties">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Properties
-          </Link>
-        </Button>
-      </div>
+    <main>
+      <PageHero
+        title={property.title}
+        backgroundImage={heroImage}
+        imageAlt={property.title}
+        minHeightClassName="min-h-[min(52vh,560px)]"
+      />
 
-      <div className="container mx-auto px-4 lg:px-8 pb-16">
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <PropertyImageGallery
-              images={propertyImageUrls}
-              title={property.title}
-            />
+      <section className="border-t border-border/60 bg-background py-10 lg:py-14">
+        <div className="container mx-auto px-4 lg:px-8">
+          <Button
+            variant="outline"
+            className="border-foreground/25 bg-transparent"
+            asChild
+          >
+            <Link href="/properties">
+              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden />
+              Back to projects
+            </Link>
+          </Button>
+        </div>
+      </section>
 
-            <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
-              <div>
-                <Badge className="mb-2 capitalize">{property.type}</Badge>
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                  {property.title}
-                </h1>
-                <p className="flex items-center gap-1.5 text-muted-foreground mt-1">
-                  <MapPin className="h-4 w-4" /> {property.address}
+      <section
+        className="border-t border-border/60 bg-background py-16 lg:py-24"
+        aria-labelledby="project-details-heading"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-3 lg:gap-16">
+            <div className="lg:col-span-2">
+              {imageUrls.length > 0 ? (
+                <PropertyImageGallery
+                  images={imageUrls}
+                  title={property.title}
+                />
+              ) : null}
+
+              <div className="mb-8">
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Project
                 </p>
-              </div>
-              {/* <p className="text-2xl lg:text-3xl font-bold text-primary">
-                {formatPrice(property.price)}
-              </p> */}
-            </div>
-
-            <div className="flex flex-wrap gap-6 py-5 border-y border-border mb-6">
-              <span className="flex items-center gap-2 text-muted-foreground">
-                <Bed className="h-5 w-5" /> {property.bedrooms} Bedrooms
-              </span>
-              <span className="flex items-center gap-2 text-muted-foreground">
-                <Bath className="h-5 w-5" /> {property.bathrooms} Bathrooms
-              </span>
-              <span className="flex items-center gap-2 text-muted-foreground">
-                <Maximize className="h-5 w-5" /> {property.area} sqft
-              </span>
-              {property.yearBuilt && (
-                <span className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="h-5 w-5" /> Built {property.yearBuilt}
-                </span>
-              )}
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-3">Description</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {property.description}
-              </p>
-            </div>
-
-            {property.projectDetails.length > 0 && (
-              <div className="mb-8 rounded-lg border border-border bg-card p-6">
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-lg font-semibold">Details</h2>
-                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5" />
-                    Updated on{" "}
-                    {new Date(property.updatedAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
+                <h2
+                  id="project-details-heading"
+                  className="text-balance text-3xl font-bold uppercase tracking-tight text-primary sm:text-4xl"
+                >
+                  {property.title}
+                </h2>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Badge className="capitalize">{property.type}</Badge>
+                  {property.location ? (
+                    <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4" aria-hidden />
+                      {property.location}
+                    </span>
+                  ) : null}
                 </div>
-                <hr className="border-border my-4" />
-                <h3 className="text-base font-semibold mb-1">
-                  Project At A Glance
-                </h3>
-                <hr className="border-border my-4" />
-                <div className="divide-y divide-border">
-                  {property.projectDetails.map((detail, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start justify-between py-3 gap-4"
-                    >
-                      <span className="font-semibold text-foreground whitespace-nowrap">
-                        {detail.label} :
-                      </span>
-                      <span className="text-muted-foreground text-right">
-                        {detail.value}
-                      </span>
-                    </div>
-                  ))}
+                {property.address ? (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {property.address}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="mb-10 grid gap-3 border-y border-border/60 py-5 sm:grid-cols-3">
+                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Bed className="h-4 w-4" aria-hidden /> {property.bedrooms}{" "}
+                  bedrooms
+                </div>
+                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Bath className="h-4 w-4" aria-hidden /> {property.bathrooms}{" "}
+                  bathrooms
+                </div>
+                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Maximize className="h-4 w-4" aria-hidden />{" "}
+                  {formatArea(property.area)}
                 </div>
               </div>
-            )}
 
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-3">Features</h2>
-              <div className="flex flex-wrap gap-2">
-                {property.features.map((feature) => (
-                  <Badge key={feature} variant="secondary">
-                    {feature}
-                  </Badge>
-                ))}
-              </div>
+              {property.description ? (
+                <div className="mb-10">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                    Description
+                  </h3>
+                  <Markdown
+                    content={property.description}
+                    className="mt-4 text-muted-foreground"
+                  />
+                </div>
+              ) : null}
+
+              {property.features.length > 0 ? (
+                <div className="mb-10">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                    Features
+                  </h3>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {property.features.map((f) => (
+                      <Badge key={f} variant="secondary">
+                        {f}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
-          </div>
 
-          <div>
-            <div className="sticky top-28 space-y-6">
-              <div className="rounded-lg border border-border p-6">
-                <h3 className="font-semibold mb-4">
-                  Interested in this property?
-                </h3>
-                {property.brochureKey &&
-                  getCdnImageUrl(property.brochureKey) && (
-                    <Button className="w-full mb-3" asChild>
+            <aside className="lg:sticky lg:top-28 lg:self-start">
+              <div className="rounded-sm border border-border/60 bg-muted/20 p-6">
+                <p className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                  Interested?
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Get details, availability, and brochure.
+                </p>
+
+                <div className="mt-6 grid gap-3">
+                  {property.brochureKey &&
+                  getCdnImageUrl(property.brochureKey) ? (
+                    <Button className="w-full" asChild>
                       <Link
                         href={getCdnImageUrl(property.brochureKey)!}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <DownloadIcon className="h-4 w-4" />
-                        Download Brochure
+                        <DownloadIcon className="mr-2 h-4 w-4" aria-hidden />
+                        Download brochure
                       </Link>
                     </Button>
-                  )}
+                  ) : null}
+                  <Button
+                    variant="outline"
+                    className="w-full border-foreground/25 bg-transparent hover:bg-muted/60"
+                    asChild
+                  >
+                    <Link href="/contact">
+                      Contact us
+                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </aside>
+          </div>
 
-                <Button variant="outline" className="w-full" asChild>
-                  <Link href="/contact">Ask a Question</Link>
-                </Button>
+          {related.length > 0 ? (
+            <div className="mt-16 border-t border-border/60 pt-12">
+              <div className="mb-8 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    More
+                  </p>
+                  <h3 className="text-balance text-2xl font-bold uppercase tracking-tight text-primary sm:text-3xl">
+                    Similar projects
+                  </h3>
+                </div>
+                <Link
+                  href="/properties"
+                  className="inline-flex items-center text-sm font-medium text-foreground hover:opacity-80"
+                >
+                  View all
+                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                </Link>
               </div>
 
-              {property.lat != null &&
-                property.lng != null &&
-                !Number.isNaN(Number(property.lat)) &&
-                !Number.isNaN(Number(property.lng)) && (
-                  <div className="space-y-2">
-                    <h3 className="font-semibold">Location</h3>
-                    <MapClient
-                      pins={[
-                        {
-                          lat: Number(property.lat),
-                          lng: Number(property.lng),
-                        },
-                      ]}
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      asChild
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {related.map((p) => {
+                  const coverKey = p.images[0];
+                  const coverUrl = coverKey ? getCdnImageUrl(coverKey) : null;
+                  return (
+                    <Link
+                      key={p.id}
+                      href={`/properties/${p.slug}`}
+                      className="group relative overflow-hidden rounded-sm border border-border/60 bg-muted transition-colors hover:bg-muted/60"
                     >
-                      <Link
-                        href={`https://www.google.com/maps?q=${Number(property.lat)},${Number(property.lng)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Open in Google Maps
-                      </Link>
-                    </Button>
-                  </div>
-                )}
+                      <div className="relative aspect-4/3 bg-muted">
+                        {coverUrl ? (
+                          <img
+                            src={coverUrl}
+                            alt={p.title}
+                            className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div
+                            className="absolute inset-0 bg-muted"
+                            aria-hidden
+                          />
+                        )}
+                        <div
+                          className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.78)_0%,transparent_60%)]"
+                          aria-hidden
+                        />
+                        <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                          <p className="text-sm font-bold uppercase tracking-wide">
+                            {p.title}
+                          </p>
+                          {p.location ? (
+                            <p className="mt-1 text-xs text-white/85">
+                              {p.location}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
-
-        {relatedProperties.length > 0 && (
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">Similar Properties</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedProperties.map((p) => (
-                <PropertyCard key={p.id} property={p} />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
