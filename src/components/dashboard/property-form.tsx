@@ -122,6 +122,13 @@ const DHAKA_AREAS = [
   "Airport",
 ] as const;
 
+export function isPresetDhakaArea(location?: string): boolean {
+  const trimmedLocation = (location ?? "").trim();
+  return DHAKA_AREAS.includes(
+    trimmedLocation as (typeof DHAKA_AREAS)[number],
+  );
+}
+
 function getDefaultValues(property?: Property | null): PropertyFormValues {
   return {
     title: property?.title ?? "",
@@ -441,9 +448,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
               name="location"
               control={form.control}
               render={({ field, fieldState }) => {
-                const presetMatch = DHAKA_AREAS.includes(
-                  (field.value ?? "").trim() as (typeof DHAKA_AREAS)[number],
-                );
+                const presetMatch = isPresetDhakaArea(field.value);
                 const selectValue =
                   field.value && presetMatch ? field.value : "__other__";
 
@@ -480,7 +485,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                       <Input
                         value={presetMatch ? "" : (field.value ?? "")}
                         onChange={(e) => field.onChange(e.target.value)}
-                        disabled={saving || presetMatch}
+                        disabled={saving}
                         placeholder="Other area (type here)"
                         aria-invalid={fieldState.invalid}
                       />
